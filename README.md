@@ -1,2 +1,4 @@
-# CuriosityLab
-Main Website of curiosity lab
+
+Main Website of Curiosity Lab
+
+Made by Suraj and Chhatrapal
