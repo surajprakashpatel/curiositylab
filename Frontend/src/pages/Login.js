@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/login.css';
 import googleIcon from '../assets/google-icon.svg';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login, loginWithGoogle, resetPassword } = useAuth();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -10,6 +15,9 @@ const LoginPage = () => {
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -23,10 +31,56 @@ const LoginPage = () => {
     setPasswordVisible(prev => !prev);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login form submitted:', formData);
-    // Add your login logic here
+    
+    try {
+      setMessage('');
+      setError('');
+      setLoading(true);
+      
+      await login(formData.email, formData.password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to log in. Please check your credentials.');
+      console.error(err);
+    }
+    
+    setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setMessage('');
+      setError('');
+      setLoading(true);
+      
+      await loginWithGoogle();
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.');
+      console.error(err);
+    }
+    
+    setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      setMessage('');
+      setError('');
+      
+      if (!formData.email) {
+        setError('Please enter your email address.');
+        return;
+      }
+      
+      await resetPassword(formData.email);
+      setMessage('Check your email for password reset instructions.');
+    } catch (err) {
+      setError('Failed to reset password. Please try again.');
+      console.error(err);
+    }
   };
 
   return (
@@ -37,8 +91,11 @@ const LoginPage = () => {
           
           <div className="signup-link">
             New to Curiosity Lab?
-            <a href="/signup"> Create an account</a>
+            <Link to="/signup"> Create an account</Link>
           </div>
+          
+          {error && <div className="alert alert-error">{error}</div>}
+          {message && <div className="alert alert-success">{message}</div>}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -91,16 +148,33 @@ const LoginPage = () => {
                 <label htmlFor="rememberMe">Remember me</label>
               </div>
               
-              <a href="/forgot-password" className="forgot-password">Forgot password?</a>
+              <button 
+                type="button" 
+                className="forgot-password"
+                onClick={handleResetPassword}
+              >
+                Forgot password?
+              </button>
             </div>
             
-            <button type="submit" className="login-btn">Log In</button>
+            <button 
+              type="submit" 
+              className="login-btn" 
+              disabled={loading}
+            >
+              {loading ? 'Logging in...' : 'Log In'}
+            </button>
             
             <div className="divider">
               <span>Or</span>
             </div>
             
-            <button type="button" className="google-signin-btn">
+            <button 
+              type="button" 
+              className="google-signin-btn"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
               <img src={googleIcon} alt="Google" className="google-icon" />
               Log in with Google
             </button>

@@ -1,23 +1,37 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/signup.css';
 import googleIcon from '../assets/google-icon.svg';
-
-
+import { useAuth } from '../contexts/AuthContext';
+import { setDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 const SignupPage = () => {
+  const navigate = useNavigate();
+  const { signup, loginWithGoogle } = useAuth();
+  
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
-    phoneNumber: '',
+    age: 0,
+    mobile : 0,
     password: '',
     confirmPassword: '',
-    agreeToTerms: false
+    agreeToTerms: false,
+    progileImgLink: "",
+    accessLevel: "",
+    accountStatus:"",
+    address : "",
+    accountStatus:"pending"
   });
 
   const [passwordVisible, setPasswordVisible] = useState({
     password: false,
     confirmPassword: false
   });
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -34,10 +48,63 @@ const SignupPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your signup logic here
+    
+    if (formData.password !== formData.confirmPassword) {
+      return setError('Passwords do not match');
+    }
+    
+    if (formData.password.length < 6) {
+      return setError('Password should be at least 6 characters');
+    }
+    
+    try {
+      setError('');
+      setLoading(true);
+      
+      // Create user in Firebase Authentication
+      const userCredential = await signup(formData.email, formData.password);
+      
+      // Store additional user data in Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        name: formData.fullName,
+        email: formData.email,
+        mobile: formData.phoneNumber,
+        createdAt: new Date().toISOString(),
+        age: 0,
+        password: '',
+        confirmPassword: '',
+        agreeToTerms: false,
+        progileImgLink: "",
+        accessLevel: "",
+        accountStatus:"",
+        address : "",
+        accountStatus:"pending"
+      });
+      
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to create an account. ' + err.message);
+      console.error(err);
+    }
+    
+    setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      
+      await loginWithGoogle();
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to sign up with Google. Please try again.');
+      console.error(err);
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -48,8 +115,10 @@ const SignupPage = () => {
           
           <div className="login-link">
             Already a member?
-            <a href="/login"> Log in here</a>
+            <Link to="/login"> Log in here</Link>
           </div>
+          
+          {error && <div className="alert alert-error">{error}</div>}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -151,17 +220,28 @@ const SignupPage = () => {
                 required
               />
               <label htmlFor="agreeToTerms">
-                By signing up, you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+                By signing up, you agree to our <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>.
               </label>
             </div>
             
-            <button type="submit" className="create-account-btn">Create Account</button>
+            <button 
+              type="submit" 
+              className="create-account-btn"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
             
             <div className="divider">
               <span>Or</span>
             </div>
             
-            <button type="button" className="google-signin-btn">
+            <button 
+              type="button" 
+              className="google-signin-btn"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
               <img src={googleIcon} alt="Google" className="google-icon" />
               Sign up with Google
             </button>

@@ -5,20 +5,24 @@ import './App.css'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Main from './pages/Main'
+import Dashboard from './pages/Dashboard'
+import { AuthProvider } from './contexts/AuthContext'
 
 
 function App() {
 
   return (
-    <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Main/>}/>
-      <Route path="/signup" element={<Signup/>}/>
-      <Route path='/login' element={<Login/>}/>
-      {/* <Route path="/tasks" element={<Tasks/>}/> */}
-    </Routes>
-
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Main/>}/>
+        <Route path="/signup" element={<Signup/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/dashboard' element={<Dashboard/>}/>
+        {/* <Route path="/tasks" element={<Tasks/>}/> */}
+      </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

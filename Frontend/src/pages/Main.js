@@ -55,6 +55,6 @@ const Main = () => {
             </footer>
         </div>
     );
-}
+};
 
 export default Main;
