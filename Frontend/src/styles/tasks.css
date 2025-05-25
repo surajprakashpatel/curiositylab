@@ -2,26 +2,235 @@
 .erp-container {
   display: flex;
   min-height: 100vh;
-  background-color: #f6f8fa;
+  background-color: #f7f9fc;
+  transition: all 0.3s ease;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  position: absolute;
+  bottom: 20px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #f7f9fc;
+  border: 1px solid #e1e4e8;
+  color: #1A74A8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.dark-theme .sidebar-toggle {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #64a1d0;
+}
+
+.sidebar-toggle:hover {
+  background-color: #1A74A8;
+  color: white;
+}
+
+.dark-theme .sidebar-toggle:hover {
+  background-color: #0f3854;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f5f8;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: #e0e5e8;
+}
+
+/* Dark Theme Styles */
+.dark-theme {
+  color: #e0e0e0;
+}
+
+.dark-theme .erp-container {
+  background-color: #1a1a1a;
+}
+
+.dark-theme .sidebar {
+  background-color: #0f3854;
+  border-right: 1px solid #2a2a2a;
+}
+
+.dark-theme .logo {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .sidebar nav li:hover {
+  background-color: #164465;
+}
+
+.dark-theme .sidebar nav li.active {
+  background-color: #0e513f;
+}
+
+.dark-theme .header {
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #333;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .search-bar {
+  background-color: #333;
+}
+
+.dark-theme .search-bar input {
+  color: #e0e0e0;
+}
+
+.dark-theme .new-task-btn {
+  background-color: #196b35;
+}
+
+.dark-theme .new-task-btn:hover {
+  background-color: #134e27;
+}
+
+.dark-theme .theme-toggle {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-theme .theme-toggle:hover {
+  background-color: #444;
+}
+
+.dark-theme .avatar {
+  background-color: #0f3854;
+}
+
+.dark-theme .user-name {
+  color: #e0e0e0;
+}
+
+.dark-theme .board-header h1 {
+  color: #64a1d0;
+}
+
+.dark-theme .filter-dropdown {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+.dark-theme .board-column {
+  background-color: #222;
+  border-top: 3px solid #0f3854;
+}
+
+.dark-theme .column-header {
+  color: #64a1d0;
+}
+
+.dark-theme .column-header h3 {
+  color: #e0e0e0;
+}
+
+.dark-theme .task-count {
+  background-color: #0e513f;
+}
+
+.dark-theme .task-card {
+  background-color: #2a2a2a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .task-card:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  border-left: 2px solid #196b35;
+}
+
+.dark-theme .task-card h4 {
+  color: #64a1d0;
+}
+
+.dark-theme .task-description {
+  color: #b0b0b0;
+}
+
+.dark-theme .progress-bar {
+  background-color: #333;
+}
+
+.dark-theme .progress-fill {
+  background-color: #0e513f;
+}
+
+.dark-theme .project-type {
+  background-color: rgba(14, 81, 63, 0.2);
+  color: #64d0a0;
+}
+
+.dark-theme .github-link {
+  background-color: #333;
+  color: #64a1d0;
+}
+
+.dark-theme .github-link:hover {
+  background-color: #444;
+}
+
+.dark-theme .due-date {
+  color: #b0b0b0;
 }
 
 /* Sidebar Styles */
 .sidebar {
   width: 250px;
-  background-color: #1e1f21;
-  color: #fff;
+  background-color: #ffffff;
+  color: #333;
   padding: 20px 0;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .sidebar {
+  width: 60px;
 }
 
 .logo {
   padding: 0 20px 20px;
-  border-bottom: 1px solid #2d2e30;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
 }
 
 .logo h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #fff;
+  color: #1A74A8;
+  transition: font-size 0.3s ease;
+}
+
+.sidebar-collapsed .logo h2 {
+  font-size: 1.2rem;
 }
 
 .sidebar nav ul {
@@ -36,19 +245,58 @@
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
+  color: #555;
+  border-left: 3px solid transparent;
 }
 
 .sidebar nav li:hover {
-  background-color: #2d2e30;
+  background-color: rgba(26, 116, 168, 0.05);
+  color: #1A74A8;
 }
 
 .sidebar nav li.active {
-  background-color: #2d2e30;
-  border-left: 3px solid #3F51B5;
+  background-color: rgba(26, 116, 168, 0.08);
+  border-left: 3px solid #1A74A8;
+  color: #1A74A8;
 }
 
 .sidebar .icon {
   margin-right: 12px;
+  font-size: 1.1rem;
+}
+
+.sidebar-collapsed .sidebar .icon {
+  margin-right: 0;
+}
+
+/* Dark Theme Sidebar */
+.dark-theme .sidebar {
+  background-color: #1f1f1f;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  border-right: 1px solid #2a2a2a;
+}
+
+.dark-theme .logo {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .logo h2 {
+  color: #64a1d0;
+}
+
+.dark-theme .sidebar nav li {
+  color: #b0b0b0;
+}
+
+.dark-theme .sidebar nav li:hover {
+  background-color: rgba(100, 161, 208, 0.05);
+  color: #64a1d0;
+}
+
+.dark-theme .sidebar nav li.active {
+  background-color: rgba(100, 161, 208, 0.08);
+  border-left-color: #64a1d0;
+  color: #64a1d0;
 }
 
 /* Main Content Area */
@@ -56,16 +304,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: 0;
 }
 
 /* Header Styles */
 .header {
-  background-color: #fff;
+  background-color: #FFFFFF;
   padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e1e4e8;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .search-bar {
@@ -92,7 +346,7 @@
 }
 
 .new-task-btn {
-  background-color: #3F51B5;
+  background-color: #29A050;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -102,7 +356,7 @@
 }
 
 .new-task-btn:hover {
-  background-color: #303f9f;
+  background-color: #239776;
 }
 
 .user-profile {
@@ -114,7 +368,7 @@
 .avatar {
   width: 32px;
   height: 32px;
-  background-color: #3F51B5;
+  background-color: #1A74A8;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -144,7 +398,7 @@
 
 .filter-dropdown {
   padding: 8px 12px;
-  border: 1px solid #e1e4e8;
+  border: 1px solid #239776;
   border-radius: 6px;
   background-color: white;
 }
@@ -157,9 +411,10 @@
 }
 
 .board-column {
-  background-color: #f6f8fa;
+  background-color: #f0f5f8;
   border-radius: 8px;
   padding: 16px;
+  border-top: 3px solid #1A74A8;
 }
 
 .column-header {
@@ -167,10 +422,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  color: #1A74A8;
 }
 
 .task-count {
-  background-color: #e1e4e8;
+  background-color: #239776;
+  color: #FFFFFF;
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.875rem;
@@ -183,7 +440,7 @@
 }
 
 .task-card {
-  background-color: white;
+  background-color: #FFFFFF;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -193,6 +450,7 @@
 .task-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  border-left: 2px solid #29A050;
 }
 
 .task-description {
@@ -218,7 +476,7 @@
 
 .progress-fill {
   height: 100%;
-  background-color: #3F51B5;
+  background-color: #239776;
   transition: width 0.3s ease;
 }
 
@@ -257,6 +515,7 @@
 .task-card h4 {
   margin: 0 0 8px 0;
   font-size: 0.9375rem;
+  color: #1A74A8;
 }
 
 .task-meta {
@@ -268,8 +527,8 @@
 }
 
 .project-type {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: rgba(35, 151, 118, 0.1);
+  color: #239776;
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -279,18 +538,22 @@
 .github-link {
   display: block;
   text-decoration: none;
-  color: #666;
+  color: #1A74A8;
   font-size: 0.875rem;
   margin-top: 8px;
   padding: 4px 8px;
-  background-color: #f5f5f5;
+  background-color: rgba(42, 175, 189, 0.05);
   border-radius: 4px;
   transition: background-color 0.2s;
 }
 
 .github-link:hover {
-  background-color: #eeeeee;
-  color: #333;
+  background-color: rgba(42, 175, 189, 0.1);
+  color: #1A74A8;
+}
+
+.board-header h1 {
+  color: #1A74A8;
 }
 
 /* Responsive Design */
@@ -317,4 +580,99 @@
   .search-bar {
     width: 200px;
   }
+}
+
+/* Dark Theme Modal Styles */
+.dark-theme .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.dark-theme .modal-content {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .modal-header {
+  border-bottom: 1px solid #333;
+}
+
+.dark-theme .close-button {
+  color: #e0e0e0;
+}
+
+.dark-theme .close-button:hover {
+  background-color: #444;
+}
+
+.dark-theme .form-group label {
+  color: #e0e0e0;
+}
+
+.dark-theme .form-group input,
+.dark-theme .form-group textarea,
+.dark-theme .form-group select {
+  background-color: #333;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+.dark-theme .form-group input:focus,
+.dark-theme .form-group textarea:focus,
+.dark-theme .form-group select:focus {
+  border-color: #64a1d0;
+  box-shadow: 0 0 0 2px rgba(100, 161, 208, 0.2);
+}
+
+.dark-theme .cancel-btn {
+  background-color: #444;
+  color: #e0e0e0;
+}
+
+.dark-theme .submit-btn {
+  background-color: #196b35;
+}
+
+.dark-theme .submit-btn:hover {
+  background-color: #134e27;
+}
+
+.dark-theme .detail-value {
+  color: #b0b0b0;
+}
+
+.dark-theme .detail-group label {
+  color: #999;
+}
+
+.dark-theme .status-badge {
+  border: 1px solid #444;
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar-collapsed .logo {
+  padding: 20px 0;
+}
+
+.sidebar-collapsed .sidebar nav li {
+  padding: 12px 0;
+  justify-content: center;
+}
+
+.sidebar-collapsed .sidebar-toggle {
+  right: -12px;
+}
+
+/* Fix spacing of menu items in collapsed mode */
+.sidebar-collapsed .sidebar nav li span:not(.icon) {
+  display: none;
+}
+
+.sidebar nav li span.icon {
+  transition: margin 0.3s ease;
+}
+
+/* Center icons in collapsed state */
+.sidebar-collapsed .sidebar nav li .icon {
+  margin: 0;
 }

@@ -9,6 +9,8 @@ const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
   const [tasks, setTasks] = useState({
     todo: [],
     inProgress: [],
@@ -18,7 +20,26 @@ const Tasks = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+    
+    // Apply dark mode class to body
+    if (darkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode);
+  };
+
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', newState);
+  };
 
   const fetchTasks = async () => {
     try {
@@ -112,22 +133,25 @@ const Tasks = () => {
   };
 
   return (
-    <div className="erp-container">
+    <div className={`erp-container ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
-          <h2>Curiosity Lab</h2>
+          <h2>{sidebarCollapsed ? 'CL' : 'Curiosity Lab'}</h2>
         </div>
         <nav>
           <ul>
-            <li className="active"><span className="icon">📋</span> Tasks</li>
-            <li><span className="icon">📊</span> Dashboard</li>
-            <li><span className="icon">👥</span> Team</li>
-            <li><span className="icon">📁</span> Projects</li>
-            <li><span className="icon">📅</span> Calendar</li>
-            <li><span className="icon">⚙️</span> Settings</li>
+            <li className="active"><span className="icon">📋</span> {!sidebarCollapsed && <span>Tasks</span>}</li>
+            <li><span className="icon">📊</span> {!sidebarCollapsed && <span>Dashboard</span>}</li>
+            <li><span className="icon">👥</span> {!sidebarCollapsed && <span>Team</span>}</li>
+            <li><span className="icon">📁</span> {!sidebarCollapsed && <span>Projects</span>}</li>
+            <li><span className="icon">📅</span> {!sidebarCollapsed && <span>Calendar</span>}</li>
+            <li><span className="icon">⚙️</span> {!sidebarCollapsed && <span>Settings</span>}</li>
           </ul>
         </nav>
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
+          {sidebarCollapsed ? '→' : '←'}
+        </button>
       </aside>
 
       <main className="main-content">
@@ -138,6 +162,9 @@ const Tasks = () => {
             <input type="text" placeholder="Search tasks..." />
           </div>
           <div className="user-menu">
+            <button className="theme-toggle" onClick={toggleDarkMode}>
+              {darkMode ? '☀️' : '🌙'}
+            </button>
             <button className="new-task-btn" onClick={() => setIsModalOpen(true)}>+ New Task</button>
             <div className="user-profile">
               <span className="avatar">CS</span>
