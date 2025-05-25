@@ -68,19 +68,17 @@ const SignupPage = () => {
       
       // Store additional user data in Firestore
       await setDoc(doc(db, "users", userCredential.user.uid), {
+        displayName: formData.fullName,
         name: formData.fullName,
         email: formData.email,
         mobile: formData.phoneNumber,
         createdAt: new Date().toISOString(),
-        age: 0,
-        password: '',
-        confirmPassword: '',
-        agreeToTerms: false,
-        progileImgLink: "",
-        accessLevel: "",
-        accountStatus:"",
-        address : "",
-        accountStatus:"pending"
+        age: formData.age || 0,
+        agreeToTerms: formData.agreeToTerms,
+        profileImgLink: "",
+        accessLevel: "user",
+        accountStatus: "active",
+        address: formData.address || ""
       });
       
       navigate('/dashboard');

@@ -27,7 +27,13 @@
   transition: all 0.3s ease;
 }
 
-.dark-theme .sidebar-toggle {
+/* Dark Theme Styles - Scoped to erp-container */
+.erp-container.dark-theme {
+  color: #e0e0e0;
+  background-color: #1a1a1a;
+}
+
+.erp-container.dark-theme .sidebar-toggle {
   background-color: #2a2a2a;
   border-color: #444;
   color: #64a1d0;
@@ -38,7 +44,7 @@
   color: white;
 }
 
-.dark-theme .sidebar-toggle:hover {
+.erp-container.dark-theme .sidebar-toggle:hover {
   background-color: #0f3854;
 }
 
@@ -62,140 +68,47 @@
   background-color: #e0e5e8;
 }
 
-/* Dark Theme Styles */
-.dark-theme {
-  color: #e0e0e0;
+/* User Profile Styling */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
 }
 
-.dark-theme .erp-container {
-  background-color: #1a1a1a;
+.user-profile:hover {
+  background-color: #f0f5f8;
 }
 
-.dark-theme .sidebar {
+.erp-container.dark-theme .user-profile:hover {
+  background-color: #333;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #1A74A8;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.user-name {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Dark theme avatar */
+.erp-container.dark-theme .avatar {
   background-color: #0f3854;
-  border-right: 1px solid #2a2a2a;
-}
-
-.dark-theme .logo {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.dark-theme .sidebar nav li:hover {
-  background-color: #164465;
-}
-
-.dark-theme .sidebar nav li.active {
-  background-color: #0e513f;
-}
-
-.dark-theme .header {
-  background-color: #2a2a2a;
-  border-bottom: 1px solid #333;
-  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.dark-theme .search-bar {
-  background-color: #333;
-}
-
-.dark-theme .search-bar input {
-  color: #e0e0e0;
-}
-
-.dark-theme .new-task-btn {
-  background-color: #196b35;
-}
-
-.dark-theme .new-task-btn:hover {
-  background-color: #134e27;
-}
-
-.dark-theme .theme-toggle {
-  background-color: #333;
-  color: #fff;
-}
-
-.dark-theme .theme-toggle:hover {
-  background-color: #444;
-}
-
-.dark-theme .avatar {
-  background-color: #0f3854;
-}
-
-.dark-theme .user-name {
-  color: #e0e0e0;
-}
-
-.dark-theme .board-header h1 {
-  color: #64a1d0;
-}
-
-.dark-theme .filter-dropdown {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  border-color: #444;
-}
-
-.dark-theme .board-column {
-  background-color: #222;
-  border-top: 3px solid #0f3854;
-}
-
-.dark-theme .column-header {
-  color: #64a1d0;
-}
-
-.dark-theme .column-header h3 {
-  color: #e0e0e0;
-}
-
-.dark-theme .task-count {
-  background-color: #0e513f;
-}
-
-.dark-theme .task-card {
-  background-color: #2a2a2a;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.dark-theme .task-card:hover {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  border-left: 2px solid #196b35;
-}
-
-.dark-theme .task-card h4 {
-  color: #64a1d0;
-}
-
-.dark-theme .task-description {
-  color: #b0b0b0;
-}
-
-.dark-theme .progress-bar {
-  background-color: #333;
-}
-
-.dark-theme .progress-fill {
-  background-color: #0e513f;
-}
-
-.dark-theme .project-type {
-  background-color: rgba(14, 81, 63, 0.2);
-  color: #64d0a0;
-}
-
-.dark-theme .github-link {
-  background-color: #333;
-  color: #64a1d0;
-}
-
-.dark-theme .github-link:hover {
-  background-color: #444;
-}
-
-.dark-theme .due-date {
-  color: #b0b0b0;
 }
 
 /* Sidebar Styles */
@@ -270,30 +183,30 @@
 }
 
 /* Dark Theme Sidebar */
-.dark-theme .sidebar {
+.erp-container.dark-theme .sidebar {
   background-color: #1f1f1f;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   border-right: 1px solid #2a2a2a;
 }
 
-.dark-theme .logo {
+.erp-container.dark-theme .logo {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.dark-theme .logo h2 {
+.erp-container.dark-theme .logo h2 {
   color: #64a1d0;
 }
 
-.dark-theme .sidebar nav li {
+.erp-container.dark-theme .sidebar nav li {
   color: #b0b0b0;
 }
 
-.dark-theme .sidebar nav li:hover {
+.erp-container.dark-theme .sidebar nav li:hover {
   background-color: rgba(100, 161, 208, 0.05);
   color: #64a1d0;
 }
 
-.dark-theme .sidebar nav li.active {
+.erp-container.dark-theme .sidebar nav li.active {
   background-color: rgba(100, 161, 208, 0.08);
   border-left-color: #64a1d0;
   color: #64a1d0;
@@ -359,22 +272,40 @@
   background-color: #239776;
 }
 
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Dark Theme Header */
+.erp-container.dark-theme .header {
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #333;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #1A74A8;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
+.erp-container.dark-theme .search-bar {
+  background-color: #333;
+}
+
+.erp-container.dark-theme .search-bar input {
+  color: #e0e0e0;
+}
+
+.erp-container.dark-theme .new-task-btn {
+  background-color: #196b35;
+}
+
+.erp-container.dark-theme .new-task-btn:hover {
+  background-color: #134e27;
+}
+
+.erp-container.dark-theme .theme-toggle {
+  background-color: #333;
+  color: #fff;
+}
+
+.erp-container.dark-theme .theme-toggle:hover {
+  background-color: #444;
+}
+
+.erp-container.dark-theme .user-name {
+  color: #e0e0e0;
 }
 
 /* Task Board Styles */
@@ -488,165 +419,76 @@
   text-align: right;
 }
 
-.task-priority {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 8px;
+/* Dark Theme Task Board */
+.erp-container.dark-theme .board-header h1 {
+  color: #64a1d0;
 }
 
-.task-priority[data-priority="high"] {
-  background-color: #ffebee;
-  color: #d32f2f;
-}
-
-.task-priority[data-priority="medium"] {
-  background-color: #fff3e0;
-  color: #f57c00;
-}
-
-.task-priority[data-priority="low"] {
-  background-color: #e8f5e9;
-  color: #388e3c;
-}
-
-.task-card h4 {
-  margin: 0 0 8px 0;
-  font-size: 0.9375rem;
-  color: #1A74A8;
-}
-
-.task-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8125rem;
-  color: #666;
-  margin: 8px 0;
-}
-
-.project-type {
-  background-color: rgba(35, 151, 118, 0.1);
-  color: #239776;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.github-link {
-  display: block;
-  text-decoration: none;
-  color: #1A74A8;
-  font-size: 0.875rem;
-  margin-top: 8px;
-  padding: 4px 8px;
-  background-color: rgba(42, 175, 189, 0.05);
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.github-link:hover {
-  background-color: rgba(42, 175, 189, 0.1);
-  color: #1A74A8;
-}
-
-.board-header h1 {
-  color: #1A74A8;
-}
-
-/* Responsive Design */
-@media (max-width: 1400px) {
-  .board-columns {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 60px;
-  }
-  
-  .sidebar .logo h2,
-  .sidebar nav li span:not(.icon) {
-    display: none;
-  }
-  
-  .board-columns {
-    grid-template-columns: 1fr;
-  }
-  
-  .search-bar {
-    width: 200px;
-  }
-}
-
-/* Dark Theme Modal Styles */
-.dark-theme .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.dark-theme .modal-content {
+.erp-container.dark-theme .filter-dropdown {
   background-color: #2a2a2a;
   color: #e0e0e0;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  border-color: #444;
 }
 
-.dark-theme .modal-header {
-  border-bottom: 1px solid #333;
+.erp-container.dark-theme .board-column {
+  background-color: #222;
+  border-top: 3px solid #0f3854;
 }
 
-.dark-theme .close-button {
+.erp-container.dark-theme .column-header {
+  color: #64a1d0;
+}
+
+.erp-container.dark-theme .column-header h3 {
   color: #e0e0e0;
 }
 
-.dark-theme .close-button:hover {
-  background-color: #444;
+.erp-container.dark-theme .task-count {
+  background-color: #0e513f;
 }
 
-.dark-theme .form-group label {
-  color: #e0e0e0;
+.erp-container.dark-theme .task-card {
+  background-color: #2a2a2a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.dark-theme .form-group input,
-.dark-theme .form-group textarea,
-.dark-theme .form-group select {
-  background-color: #333;
-  border: 1px solid #444;
-  color: #e0e0e0;
+.erp-container.dark-theme .task-card:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  border-left: 2px solid #196b35;
 }
 
-.dark-theme .form-group input:focus,
-.dark-theme .form-group textarea:focus,
-.dark-theme .form-group select:focus {
-  border-color: #64a1d0;
-  box-shadow: 0 0 0 2px rgba(100, 161, 208, 0.2);
+.erp-container.dark-theme .task-card h4 {
+  color: #64a1d0;
 }
 
-.dark-theme .cancel-btn {
-  background-color: #444;
-  color: #e0e0e0;
-}
-
-.dark-theme .submit-btn {
-  background-color: #196b35;
-}
-
-.dark-theme .submit-btn:hover {
-  background-color: #134e27;
-}
-
-.dark-theme .detail-value {
+.erp-container.dark-theme .task-description {
   color: #b0b0b0;
 }
 
-.dark-theme .detail-group label {
-  color: #999;
+.erp-container.dark-theme .progress-bar {
+  background-color: #333;
 }
 
-.dark-theme .status-badge {
-  border: 1px solid #444;
+.erp-container.dark-theme .progress-fill {
+  background-color: #0e513f;
+}
+
+.erp-container.dark-theme .project-type {
+  background-color: rgba(14, 81, 63, 0.2);
+  color: #64d0a0;
+}
+
+.erp-container.dark-theme .github-link {
+  background-color: #333;
+  color: #64a1d0;
+}
+
+.erp-container.dark-theme .github-link:hover {
+  background-color: #444;
+}
+
+.erp-container.dark-theme .due-date {
+  color: #b0b0b0;
 }
 
 /* Collapsed Sidebar Styles */
@@ -675,4 +517,97 @@
 /* Center icons in collapsed state */
 .sidebar-collapsed .sidebar nav li .icon {
   margin: 0;
+}
+
+/* Dark Theme Modal Styles */
+.erp-container.dark-theme .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.erp-container.dark-theme .modal-content {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.erp-container.dark-theme .modal-header {
+  border-bottom: 1px solid #333;
+}
+
+.erp-container.dark-theme .close-button {
+  color: #e0e0e0;
+}
+
+.erp-container.dark-theme .close-button:hover {
+  background-color: #444;
+}
+
+.erp-container.dark-theme .form-group label {
+  color: #e0e0e0;
+}
+
+.erp-container.dark-theme .form-group input,
+.erp-container.dark-theme .form-group textarea,
+.erp-container.dark-theme .form-group select {
+  background-color: #333;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+.erp-container.dark-theme .form-group input:focus,
+.erp-container.dark-theme .form-group textarea:focus,
+.erp-container.dark-theme .form-group select:focus {
+  border-color: #64a1d0;
+  box-shadow: 0 0 0 2px rgba(100, 161, 208, 0.2);
+}
+
+.erp-container.dark-theme .cancel-btn {
+  background-color: #444;
+  color: #e0e0e0;
+}
+
+.erp-container.dark-theme .submit-btn {
+  background-color: #196b35;
+}
+
+.erp-container.dark-theme .submit-btn:hover {
+  background-color: #134e27;
+}
+
+.erp-container.dark-theme .detail-value {
+  color: #b0b0b0;
+}
+
+.erp-container.dark-theme .detail-group label {
+  color: #999;
+}
+
+.erp-container.dark-theme .status-badge {
+  border: 1px solid #444;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .board-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+  }
+  
+  .sidebar .logo h2,
+  .sidebar nav li span:not(.icon) {
+    display: none;
+  }
+  
+  .board-columns {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-bar {
+    width: 200px;
+  }
 }

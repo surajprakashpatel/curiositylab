@@ -4,8 +4,10 @@ import TaskModal from '../components/TaskModal';
 import TaskViewModal from '../components/TaskViewModal';
 import { db } from '../services/firebase';
 import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 const Tasks = () => {
+  const { currentUser, userProfile, fetchUserProfile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -20,14 +22,38 @@ const Tasks = () => {
 
   useEffect(() => {
     fetchTasks();
-    
-    // Apply dark mode class to body
-    if (darkMode) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.remove('dark-theme');
+  }, []);
+
+  useEffect(() => {
+    // If we have currentUser but userProfile hasn't been fetched yet
+    if (currentUser && !userProfile) {
+      fetchUserProfile(currentUser.uid);
     }
-  }, [darkMode]);
+  }, [currentUser, userProfile, fetchUserProfile]);
+
+  // Get user's name and initials
+  const getUserName = () => {
+    if (userProfile?.displayName) {
+      return userProfile.displayName;
+    } else if (userProfile?.name) {
+      return userProfile.name;
+    } else if (currentUser?.displayName) {
+      return currentUser.displayName;
+    } else if (currentUser?.email) {
+      return currentUser.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  const getUserInitials = () => {
+    const name = getUserName();
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -167,8 +193,8 @@ const Tasks = () => {
             </button>
             <button className="new-task-btn" onClick={() => setIsModalOpen(true)}>+ New Task</button>
             <div className="user-profile">
-              <span className="avatar">CS</span>
-              <span className="user-name">Chhatrapal Sahu</span>
+              <span className="avatar">{getUserInitials()}</span>
+              <span className="user-name">{getUserName()}</span>
             </div>
           </div>
         </header>
