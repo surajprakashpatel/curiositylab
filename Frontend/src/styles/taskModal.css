@@ -349,3 +349,37 @@
   display: flex;
   align-items: center;
 }
+
+.parent-task-info {
+  padding: 10px 15px;
+  margin: 0 0 15px;
+  background-color: #f7f9fc;
+  border-radius: 4px;
+  border-left: 3px solid #1A74A8;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.range-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Dark theme styles for new elements */
+.dark-theme .parent-task-info {
+  background-color: #282828;
+  border-left-color: #64a1d0;
+  color: #b0b0b0;
+}
+
+.dark-theme .range-values {
+  color: #999;
+}

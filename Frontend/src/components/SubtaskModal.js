@@ -23,6 +23,14 @@ const SubtaskModal = ({ isOpen, onClose, parentTask, onSubtaskAdded }) => {
     try {
       console.log('Creating subtask for task:', parentTask.id);
       
+      // Make sure parentTask has valid assignedTo and visibility arrays
+      // Directly use the parent task's arrays without modification
+      const assignedTo = Array.isArray(parentTask.assignedTo) ? [...parentTask.assignedTo] : [];
+      const visibility = Array.isArray(parentTask.visibility) ? [...parentTask.visibility] : [];
+      
+      console.log('Subtask assignedTo:', assignedTo);
+      console.log('Subtask visibility:', visibility);
+      
       const subtaskDoc = {
         ...subtaskData,
         parentTaskId: parentTask.id,
@@ -32,8 +40,8 @@ const SubtaskModal = ({ isOpen, onClose, parentTask, onSubtaskAdded }) => {
         projectType: parentTask.projectType,
         githubRepo: parentTask.githubRepo,
         assignedBy: parentTask.assignedBy,
-        assignedTo: parentTask.assignedTo,
-        visibility: parentTask.visibility,
+        assignedTo: assignedTo,
+        visibility: visibility,
         progress: 0,
         createdAt: new Date().toISOString(),
       };
@@ -61,9 +69,12 @@ const SubtaskModal = ({ isOpen, onClose, parentTask, onSubtaskAdded }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Create New Subtask</h2>
+          <h2>Add Subtask</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
+        <p className="parent-task-info">
+          Parent Task: <strong>{parentTask.title}</strong>
+        </p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="title">Subtask Title</label>
@@ -89,22 +100,30 @@ const SubtaskModal = ({ isOpen, onClose, parentTask, onSubtaskAdded }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="weight">Weight (% of parent task)</label>
+            <label htmlFor="weight">
+              Weight (% of parent task) - {subtaskData.weight}%
+            </label>
             <input
-              type="number"
+              type="range"
               id="weight"
               name="weight"
               min="0"
               max="100"
+              step="5"
               value={subtaskData.weight}
               onChange={handleChange}
               required
             />
+            <div className="range-values">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
           </div>
 
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="submit-btn">Create Subtask</button>
+            <button type="submit" className="submit-btn">Add Subtask</button>
           </div>
         </form>
       </div>

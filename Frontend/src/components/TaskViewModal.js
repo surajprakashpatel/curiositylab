@@ -4,7 +4,7 @@ import SubtaskModal from './SubtaskModal';
 import { db } from '../services/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
-const TaskViewModal = ({ isOpen, onClose, task }) => {
+const TaskViewModal = ({ isOpen, onClose, task, currentUser, userName }) => {
   const [isSubtaskModalOpen, setIsSubtaskModalOpen] = useState(false);
   const [subtasks, setSubtasks] = useState([]);
   const [totalWeight, setTotalWeight] = useState(0);
@@ -47,6 +47,10 @@ const TaskViewModal = ({ isOpen, onClose, task }) => {
 
   if (!isOpen || !task) return null;
 
+  // Check if the current user is assigned to this task using only username
+  const isAssigned = userName && task && task.assignedTo && Array.isArray(task.assignedTo) && 
+    task.assignedTo.includes(userName);
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -54,10 +58,11 @@ const TaskViewModal = ({ isOpen, onClose, task }) => {
           <h2>Task Details</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
+
         <div className="task-details">
           <div className="detail-group">
             <label>Title</label>
-            <p className="detail-value">{task.title}</p>
+            <h3 className="detail-value">{task.title}</h3>
           </div>
 
           <div className="detail-group">
@@ -67,25 +72,27 @@ const TaskViewModal = ({ isOpen, onClose, task }) => {
 
           <div className="detail-row">
             <div className="detail-group">
-              <label>Start Date</label>
-              <p className="detail-value">{task.startDate}</p>
+              <label>Status</label>
+              <span className={`status-badge ${task.status}`}>
+                {task.status === 'inProgress' ? 'In Progress' : task.status}
+              </span>
             </div>
+
             <div className="detail-group">
-              <label>Due Date</label>
-              <p className="detail-value">{task.lastDate}</p>
+              <label>Project Type</label>
+              <span className="project-type-badge">{task.projectType}</span>
             </div>
           </div>
 
           <div className="detail-row">
             <div className="detail-group">
-              <label>Status</label>
-              <p className={`status-badge ${task.status}`}>
-                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-              </p>
+              <label>Start Date</label>
+              <p className="detail-value">{task.startDate}</p>
             </div>
+
             <div className="detail-group">
-              <label>Project Type</label>
-              <p className="project-type-badge">{task.projectType}</p>
+              <label>Due Date</label>
+              <p className="detail-value">{task.lastDate}</p>
             </div>
           </div>
 
@@ -94,58 +101,56 @@ const TaskViewModal = ({ isOpen, onClose, task }) => {
               <label>GitHub Repository</label>
               <a 
                 href={task.githubRepo}
+                className="github-link-detail"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="github-link-detail"
               >
-                <span className="github-icon">📂</span>
-                {task.githubRepo}
+                <span className="github-icon">📂</span> {task.githubRepo}
               </a>
             </div>
           )}
 
           {/* Subtasks Section */}
-          <div className="detail-group subtasks-section">
+          <div className="subtasks-section">
             <div className="subtasks-header">
-              <label>Subtasks ({subtasks.length})</label>
-              <button 
-                className="new-subtask-btn"
-                onClick={() => setIsSubtaskModalOpen(true)}
-                disabled={totalWeight >= 100}
-              >
-                + Add Subtask
-              </button>
+              <h3>Subtasks ({subtasks.length})</h3>
+              {isAssigned && (
+                <button 
+                  className="new-subtask-btn" 
+                  onClick={() => setIsSubtaskModalOpen(true)}
+                  disabled={totalWeight >= 100}
+                >
+                  Add Subtask
+                </button>
+              )}
             </div>
+            
             {totalWeight > 100 && (
               <p className="weight-warning">
-                Total weight exceeds 100%. Please adjust subtask weights.
+                Warning: Subtasks total weight exceeds 100% of the task.
               </p>
             )}
+            
             <div className="subtasks-list">
-              {subtasks.map(subtask => (
-                <div key={subtask.id} className="subtask-card">
-                  <div className="subtask-header">
-                    <h4>{subtask.title}</h4>
-                    <span className="subtask-weight">{subtask.weight}%</span>
-                  </div>
-                  <p className="subtask-description">{subtask.description}</p>
-                  <div className="subtask-progress">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill"
-                        style={{ width: `${subtask.progress}%` }}
-                      />
+              {subtasks.length === 0 ? (
+                <p>No subtasks yet.</p>
+              ) : (
+                subtasks.map(subtask => (
+                  <div key={subtask.id} className="subtask-card">
+                    <div className="subtask-header">
+                      <h4>{subtask.title}</h4>
+                      <span className="subtask-weight">{subtask.weight}%</span>
                     </div>
-                    <span className="progress-text">{subtask.progress}%</span>
+                    <p className="subtask-description">{subtask.description}</p>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <SubtaskModal
+      <SubtaskModal 
         isOpen={isSubtaskModalOpen}
         onClose={() => setIsSubtaskModalOpen(false)}
         parentTask={task}

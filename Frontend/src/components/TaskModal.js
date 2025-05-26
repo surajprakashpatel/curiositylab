@@ -3,7 +3,7 @@ import '../styles/taskModal.css';
 import { db } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-const TaskModal = ({ isOpen, onClose, onTaskAdded }) => {
+const TaskModal = ({ isOpen, onClose, onTaskAdded, currentUser, userName }) => {
   const [taskData, setTaskData] = useState({
     title: '',
     description: '',
@@ -13,10 +13,34 @@ const TaskModal = ({ isOpen, onClose, onTaskAdded }) => {
     githubRepo: '',
     projectType: '',
     assignedBy: 'self',
-    assignedTo: ['userId','username'],
-    visibility: ['userId','projectManager','teamMembers','admin'],
+    assignedTo: [],
+    visibility: [],
     progress: 0
   });
+
+  // Reset form when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      // Initialize with current user's username in assignedTo array if user is logged in
+      // Using username only as it's what Firebase is configured to check
+      const initialAssignedTo = userName ? [userName] : [];
+      const initialVisibility = userName ? [userName] : [];
+      
+      setTaskData({
+        title: '',
+        description: '',
+        startDate: '',
+        lastDate: '',
+        status: 'todo',
+        githubRepo: '',
+        projectType: '',
+        assignedBy: 'self',
+        assignedTo: initialAssignedTo,
+        visibility: initialVisibility,
+        progress: 0
+      });
+    }
+  }, [isOpen, userName]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,17 +55,33 @@ const TaskModal = ({ isOpen, onClose, onTaskAdded }) => {
     try {
       console.log('Submitting task:', taskData);
       
+      // Make sure current user is included in the assignedTo and visibility lists
+      let updatedTaskData = { ...taskData };
+      
+      if (userName) {
+        // Ensure the username is in the assignedTo array if not already
+        if (!updatedTaskData.assignedTo.includes(userName)) {
+          updatedTaskData.assignedTo = [...updatedTaskData.assignedTo, userName];
+        }
+        
+        // Ensure the username is in the visibility array if not already
+        if (!updatedTaskData.visibility.includes(userName)) {
+          updatedTaskData.visibility = [...updatedTaskData.visibility, userName];
+        }
+      }
+      
       const docRef = await addDoc(collection(db, 'tasks'), {
-        ...taskData,
+        ...updatedTaskData,
         createdAt: new Date().toISOString()
       });
       
-      const newTask = { id: docRef.id, ...taskData };
+      const newTask = { id: docRef.id, ...updatedTaskData };
       console.log('Task created successfully:', newTask);
       
       onTaskAdded(newTask);
       onClose();
       
+      // Reset form
       setTaskData({
         title: '',
         description: '',
@@ -51,8 +91,8 @@ const TaskModal = ({ isOpen, onClose, onTaskAdded }) => {
         githubRepo: '',
         projectType: '',
         assignedBy: 'self',
-        assignedTo: ['userId','username'],
-        visibility: ['userId','projectManager','teamMembers','admin'],
+        assignedTo: [],
+        visibility: [],
         progress: 0
       });
     } catch (error) {
