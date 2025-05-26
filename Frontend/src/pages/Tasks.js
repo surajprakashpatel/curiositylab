@@ -200,7 +200,7 @@ const Tasks = () => {
   };
 
   return (
-    <div className={`erp-container ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`erp-container fullscreen-page ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
