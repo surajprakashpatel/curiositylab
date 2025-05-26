@@ -7,17 +7,16 @@ import Tasks from './pages/Tasks'
 import { AuthProvider } from './contexts/AuthContext'
 
 function App() {
-
   return (
     <AuthProvider>
       <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Main/>}/>
-        <Route path="/signup" element={<Signup/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/dashboard' element={<Tasks/>}/>
-        {/* <Route path="/tasks" element={<Tasks/>}/> */}
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Main/>}/>
+          <Route path="/signup" element={<Signup/>}/>
+          <Route path='/login' element={<Login/>}/>
+          <Route path='/dashboard' element={<Tasks/>}/>
+          {/* <Route path="/tasks" element={<Tasks/>}/> */}
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   )
