@@ -11,18 +11,30 @@ const Tasks = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') !== 'false');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
   const [tasks, setTasks] = useState({
     todo: [],
     inProgress: [],
     completed: [],
-    cancelled: []
+    cancelled: [],
+    visible: []
   });
+  const [activeTab, setActiveTab] = useState('todo');
+
+  // Set dark mode as default
+  useEffect(() => {
+    if (localStorage.getItem('darkMode') === null) {
+      localStorage.setItem('darkMode', 'true');
+      setDarkMode(true);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (currentUser) {
+      fetchTasks();
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     // If we have currentUser but userProfile hasn't been fetched yet
@@ -33,7 +45,9 @@ const Tasks = () => {
 
   // Get user's name and initials
   const getUserName = () => {
-    if (userProfile?.displayName) {
+    if (userProfile?.username) {
+      return userProfile.username;
+    } else if (userProfile?.displayName) {
       return userProfile.displayName;
     } else if (userProfile?.name) {
       return userProfile.name;
@@ -69,6 +83,8 @@ const Tasks = () => {
 
   const fetchTasks = async () => {
     try {
+      if (!currentUser) return;
+      
       console.log('Fetching tasks...');
       const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
@@ -77,22 +93,46 @@ const Tasks = () => {
         todo: [],
         inProgress: [],
         completed: [],
-        cancelled: []
+        cancelled: [],
+        visible: []
       };
 
+      // Get current user's ID and username
+      const userId = currentUser.uid;
+      const username = getUserName();
+      
+      console.log('Current user ID:', userId);
+      console.log('Current username:', username);
       console.log('Total tasks fetched:', querySnapshot.size);
       
       querySnapshot.forEach((doc) => {
         const task = { id: doc.id, ...doc.data() };
-        console.log('Processing task:', task.id, 'Status:', task.status);
+        console.log('Task:', task.id, 'assignedTo:', task.assignedTo, 'visibility:', task.visibility);
         
-        // Check if the status exists and is valid
-        if (task.status && fetchedTasks.hasOwnProperty(task.status)) {
-          fetchedTasks[task.status].push(task);
-        } else {
-          console.warn('Task has invalid status:', task.status, 'Task ID:', task.id);
-          // Default to todo if status is invalid
-          fetchedTasks.todo.push({ ...task, status: 'todo' });
+        // Check if task has assignedTo and visibility fields
+        const assignedTo = task.assignedTo || [];
+        const visibility = task.visibility || [];
+        
+        // Check if the current user is assigned to this task or has visibility
+        const isAssigned = Array.isArray(assignedTo) && 
+          (assignedTo.includes(userId) || assignedTo.includes(username));
+        const isVisible = Array.isArray(visibility) && 
+          (visibility.includes(userId) || visibility.includes(username));
+        
+        console.log('Task:', task.id, 'isAssigned:', isAssigned, 'isVisible:', isVisible);
+        
+        if (isAssigned) {
+          // If the user is assigned to this task, add it to the appropriate status list
+          if (task.status && fetchedTasks.hasOwnProperty(task.status)) {
+            fetchedTasks[task.status].push(task);
+          } else {
+            console.warn('Task has invalid status:', task.status, 'Task ID:', task.id);
+            // Default to todo if status is invalid
+            fetchedTasks.todo.push({ ...task, status: 'todo' });
+          }
+        } else if (isVisible && !isAssigned) {
+          // If the user is only in the visibility list but not assigned
+          fetchedTasks.visible.push(task);
         }
       });
 
@@ -100,7 +140,8 @@ const Tasks = () => {
         todo: fetchedTasks.todo.length,
         inProgress: fetchedTasks.inProgress.length,
         completed: fetchedTasks.completed.length,
-        cancelled: fetchedTasks.cancelled.length
+        cancelled: fetchedTasks.cancelled.length,
+        visible: fetchedTasks.visible.length
       });
 
       setTasks(fetchedTasks);
@@ -218,49 +259,49 @@ const Tasks = () => {
             </div>
           </div>
 
-          <div className="board-columns">
-            {/* To Do Column */}
-            <div className="board-column">
-              <div className="column-header">
-                <h3>To Do</h3>
-                <span className="task-count">{tasks.todo.length}</span>
-              </div>
-              <div className="task-list">
-                {renderTaskList(tasks.todo)}
-              </div>
-            </div>
+          {/* Task Tabs Navigation */}
+          <div className="task-tabs">
+            <button 
+              className={`tab-btn ${activeTab === 'todo' ? 'active' : ''}`}
+              onClick={() => setActiveTab('todo')}
+            >
+              To Do <span className="task-count-badge">{tasks.todo.length}</span>
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'inProgress' ? 'active' : ''}`}
+              onClick={() => setActiveTab('inProgress')}
+            >
+              In Progress <span className="task-count-badge">{tasks.inProgress.length}</span>
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
+              onClick={() => setActiveTab('completed')}
+            >
+              Completed <span className="task-count-badge">{tasks.completed.length}</span>
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'cancelled' ? 'active' : ''}`}
+              onClick={() => setActiveTab('cancelled')}
+            >
+              Cancelled <span className="task-count-badge">{tasks.cancelled.length}</span>
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'visible' ? 'active' : ''}`}
+              onClick={() => setActiveTab('visible')}
+            >
+              Visible <span className="task-count-badge">{tasks.visible.length}</span>
+            </button>
+          </div>
 
-            {/* In Progress Column */}
-            <div className="board-column">
-              <div className="column-header">
-                <h3>In Progress</h3>
-                <span className="task-count">{tasks.inProgress.length}</span>
-              </div>
-              <div className="task-list">
-                {renderTaskList(tasks.inProgress)}
-              </div>
-            </div>
-
-            {/* Completed Column */}
-            <div className="board-column">
-              <div className="column-header">
-                <h3>Completed</h3>
-                <span className="task-count">{tasks.completed.length}</span>
-              </div>
-              <div className="task-list">
-                {renderTaskList(tasks.completed)}
-              </div>
-            </div>
-
-            {/* Cancelled Column */}
-            <div className="board-column">
-              <div className="column-header">
-                <h3>Cancelled</h3>
-                <span className="task-count">{tasks.cancelled.length}</span>
-              </div>
-              <div className="task-list">
-                {renderTaskList(tasks.cancelled)}
-              </div>
+          {/* Active Tasks Panel */}
+          <div className="task-panel">
+            <div className="task-list-container">
+              {renderTaskList(tasks[activeTab] || [])}
+              {tasks[activeTab]?.length === 0 && (
+                <div className="empty-state">
+                  <p>No tasks found in this category</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -270,6 +311,8 @@ const Tasks = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onTaskAdded={handleTaskAdded}
+        currentUser={currentUser}
+        userName={getUserName()}
       />
 
       <TaskViewModal 
@@ -279,6 +322,8 @@ const Tasks = () => {
           setSelectedTask(null);
         }}
         task={selectedTask}
+        currentUser={currentUser}
+        userName={getUserName()}
       />
     </div>
   );
