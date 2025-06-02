@@ -211,7 +211,31 @@
 /* Action buttons */
 .action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
+}
+
+/* Account type selector */
+.account-type-selector {
+  margin-right: 8px;
+  min-width: 100px;
+}
+
+.account-type-select {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.dark-theme .account-type-select {
+  background-color: var(--card-bg-dark);
+  border-color: var(--border-color-dark);
+  color: var(--text-color-dark);
 }
 
 .approve-btn,

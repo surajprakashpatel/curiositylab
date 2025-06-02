@@ -183,21 +183,34 @@ const Admin = () => {
     );
   };
 
+  const [selectedAccountType, setSelectedAccountType] = useState({});
+
+  const handleAccountTypeChange = (userId, accountType) => {
+    setSelectedAccountType(prev => ({
+      ...prev,
+      [userId]: accountType
+    }));
+  };
+
   const handleApproveUser = async (userId) => {
     try {
+      // Get the selected account type or default to 'user'
+      const accountType = selectedAccountType[userId] || 'user';
+      
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
-        accountStatus: 'active'
+        accountStatus: 'active',
+        accountType: accountType
       });
       
       // Update local state
       setUsers(prevUsers => prevUsers.map(user => 
-        user.id === userId ? { ...user, accountStatus: 'active' } : user
+        user.id === userId ? { ...user, accountStatus: 'active', accountType: accountType } : user
       ));
       
       setPendingUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
       
-      alert('User has been approved successfully!');
+      alert(`User has been approved successfully as ${accountType}!`);
     } catch (error) {
       console.error('Error approving user:', error);
       alert('Failed to approve user. Please try again.');
@@ -300,6 +313,17 @@ const Admin = () => {
                   <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
                   {userTab === 'pending' && (
                     <td className="action-buttons">
+                      <div className="account-type-selector">
+                        <select 
+                          value={selectedAccountType[user.id] || 'user'}
+                          onChange={(e) => handleAccountTypeChange(user.id, e.target.value)}
+                          className="account-type-select"
+                        >
+                          <option value="user">User</option>
+                          <option value="client">Client</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
                       <button 
                         className="approve-btn"
                         onClick={() => handleApproveUser(user.id)}

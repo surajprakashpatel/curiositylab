@@ -67,8 +67,6 @@ const LoginPage = () => {
       // Redirect based on account type for active accounts
       if (userProfile.accountType === 'admin') {
         navigate('/admin');
-      } else if (userProfile.accountType === 'client') {
-        navigate('/client');
       } else {
         navigate('/dashboard');
       }
@@ -114,8 +112,6 @@ const LoginPage = () => {
       // Redirect based on account type for active accounts
       if (userProfile.accountType === 'admin') {
         navigate('/admin');
-      } else if (userProfile.accountType === 'client') {
-        navigate('/client');
       } else {
         navigate('/dashboard');
       }
@@ -215,38 +211,47 @@ const LoginPage = () => {
                 className="forgot-password"
                 onClick={handleResetPassword}
               >
-                Forgot Password?
+                Forgot password?
               </button>
             </div>
             
             <button 
               type="submit" 
-              className="login-btn"
+              className="login-btn" 
               disabled={loading}
             >
               {loading ? 'Logging in...' : 'Log In'}
             </button>
+            
+            <div className="divider">
+              <span>Or</span>
+            </div>
+            
+            <button 
+              type="button" 
+              className="google-signin-btn"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <img src={googleIcon} alt="Google" className="google-icon" />
+              Log in with Google
+            </button>
           </form>
-          
-          <div className="divider">
-            <span>or</span>
-          </div>
-          
-          <button 
-            className="google-signin-btn"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <img src={googleIcon} alt="Google" className="google-icon" />
-            Sign in with Google
-          </button>
         </div>
       </div>
-      
+
       <div className="left-panel">
-        <div className="left-panel-content">
-          <h1>Welcome to Curiosity Lab</h1>
-          <p>Your all-in-one ERP solution for project management</p>
+        <div className="left-content">
+          <h1>Welcome Back to<br />Curiosity Lab</h1>
+          <p>Log in to your account to access your dashboard, projects, and continue your journey with <span className="highlight">Curiosity Lab</span>.</p>
+          <div className="rating">
+            <span className="star">★</span>
+            <span className="star">★</span>
+            <span className="star">★</span>
+            <span className="star">★</span>
+            <span className="star">★</span>
+          </div>
+          <p className="testimonial">"The insights from <span className="highlight">Curiosity Lab</span> have transformed how we approach our business strategy and decision-making."</p>
         </div>
       </div>
     </div>
