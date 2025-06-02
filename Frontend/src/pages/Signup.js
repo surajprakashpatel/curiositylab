@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../styles/signup.css';
 import googleIcon from '../assets/google-icon.svg';
 import { useAuth } from '../contexts/AuthContext';
-import { setDoc, doc } from 'firebase/firestore';
+import { setDoc, doc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const SignupPage = () => {
@@ -19,8 +19,7 @@ const SignupPage = () => {
     confirmPassword: '',
     agreeToTerms: false,
     progileImgLink: "",
-    accessLevel: "",
-    accountStatus:"",
+    accountType: "Employee",
     address : "",
     accountStatus:"pending"
   });
@@ -63,6 +62,27 @@ const SignupPage = () => {
       setError('');
       setLoading(true);
       
+      // 1. Get the first name
+      const firstName = formData.fullName.trim().split(' ')[0].toLowerCase();
+
+      // 2. Check for existing usernames in Firestore
+      let finalUsername = firstName;
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", ">=", firstName), where("username", "<=", firstName + "\uf8ff"));
+      const querySnapshot = await getDocs(q);
+
+      // 3. Collect all usernames that start with the first name
+      const existingUsernames = querySnapshot.docs.map(doc => doc.data().username);
+
+      if (existingUsernames.includes(firstName)) {
+        // Find the next available number
+        let i = 1;
+        while (existingUsernames.includes(firstName + (i < 10 ? '0' + i : i))) {
+          i++;
+        }
+        finalUsername = firstName + (i < 10 ? '0' + i : i);
+      }
+
       // Create user in Firebase Authentication
       const userCredential = await signup(formData.email, formData.password);
       
@@ -76,9 +96,11 @@ const SignupPage = () => {
         age: formData.age || 0,
         agreeToTerms: formData.agreeToTerms,
         profileImgLink: "",
-        accessLevel: "user",
         accountStatus: "active",
-        address: formData.address || ""
+        address: formData.address || "adress to be updated",
+        accountType: formData.accountType || "Employee",
+        accountStatus: formData.accountStatus || "pending",
+        username: finalUsername
       });
       
       navigate('/dashboard');
