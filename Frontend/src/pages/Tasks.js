@@ -5,8 +5,10 @@ import TaskViewModal from '../components/TaskViewModal';
 import { db } from '../services/firebase';
 import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Tasks = () => {
+  const navigate = useNavigate();
   const { currentUser, userProfile, fetchUserProfile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -21,6 +23,7 @@ const Tasks = () => {
     visible: []
   });
   const [activeTab, setActiveTab] = useState('todo');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Set dark mode as default
   useEffect(() => {
@@ -42,6 +45,15 @@ const Tasks = () => {
       fetchUserProfile(currentUser.uid);
     }
   }, [currentUser, userProfile, fetchUserProfile]);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (userProfile && userProfile.accountType === 'admin') {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [userProfile]);
 
   // Get user's name and initials
   const getUserName = () => {
@@ -233,6 +245,11 @@ const Tasks = () => {
               {darkMode ? '☀️' : '🌙'}
             </button>
             <button className="new-task-btn" onClick={() => setIsModalOpen(true)}>+ New Task</button>
+            {isAdmin && (
+              <button className="admin-switch-btn" onClick={() => navigate('/admin')}>
+                Admin Dashboard
+              </button>
+            )}
             <div className="user-profile">
               <span className="avatar">{getUserInitials()}</span>
               <span className="user-name">{getUserName()}</span>
