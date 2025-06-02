@@ -306,6 +306,32 @@
   background-color: #239776;
 }
 
+.admin-switch-btn {
+  background-color: #6c5ce7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-switch-btn:hover {
+  background-color: #5649c0;
+}
+
+.erp-container.dark-theme .admin-switch-btn {
+  background-color: #5649c0;
+}
+
+.erp-container.dark-theme .admin-switch-btn:hover {
+  background-color: #4a3db2;
+}
+
 /* Dark Theme Header */
 .erp-container.dark-theme .header {
   background-color: #2a2a2a;

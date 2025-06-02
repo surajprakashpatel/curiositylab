@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle, resetPassword } = useAuth();
+  const { login, loginWithGoogle, resetPassword, fetchUserProfile, logout } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -39,8 +39,37 @@ const LoginPage = () => {
       setError('');
       setLoading(true);
       
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
+      const userCredential = await login(formData.email, formData.password);
+      const userId = userCredential.user.uid;
+      
+      // Fetch user profile to check account type and status
+      const userProfile = await fetchUserProfile(userId);
+      
+      if (!userProfile) {
+        setError('User profile not found. Please contact support.');
+        await logout();
+        return;
+      }
+      
+      // Check account status
+      if (userProfile.accountStatus === 'pending') {
+        setError('Your account is pending approval from an administrator. Please try again later.');
+        await logout();
+        return;
+      }
+      
+      if (userProfile.accountStatus === 'inactive' || userProfile.accountStatus === 'rejected') {
+        setError('Your account has been deactivated or rejected. Please contact support for assistance.');
+        await logout();
+        return;
+      }
+      
+      // Redirect based on account type for active accounts
+      if (userProfile.accountType === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError('Failed to log in. Please check your credentials.');
       console.error(err);
@@ -55,8 +84,37 @@ const LoginPage = () => {
       setError('');
       setLoading(true);
       
-      await loginWithGoogle();
-      navigate('/dashboard');
+      const result = await loginWithGoogle();
+      const userId = result.user.uid;
+      
+      // Fetch user profile to check account type and status
+      const userProfile = await fetchUserProfile(userId);
+      
+      if (!userProfile) {
+        setError('User profile not found. Please contact support.');
+        await logout();
+        return;
+      }
+      
+      // Check account status
+      if (userProfile.accountStatus === 'pending') {
+        setError('Your account is pending approval from an administrator. Please try again later.');
+        await logout();
+        return;
+      }
+      
+      if (userProfile.accountStatus === 'inactive' || userProfile.accountStatus === 'rejected') {
+        setError('Your account has been deactivated or rejected. Please contact support for assistance.');
+        await logout();
+        return;
+      }
+      
+      // Redirect based on account type for active accounts
+      if (userProfile.accountType === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError('Failed to sign in with Google. Please try again.');
       console.error(err);

@@ -96,14 +96,16 @@ const SignupPage = () => {
         age: formData.age || 0,
         agreeToTerms: formData.agreeToTerms,
         profileImgLink: "",
-        accountStatus: "active",
         address: formData.address || "adress to be updated",
-        accountType: formData.accountType || "Employee",
-        accountStatus: formData.accountStatus || "pending",
+        accountType: formData.accountType || "user",
+        accountStatus: "pending",
         username: finalUsername
       });
       
-      navigate('/dashboard');
+      // Show success message and redirect to login page
+      setError('');
+      alert('Your account has been created! It will be pending until an admin approves it. You will be redirected to the login page.');
+      navigate('/login');
     } catch (err) {
       setError('Failed to create an account. ' + err.message);
       console.error(err);
@@ -117,8 +119,16 @@ const SignupPage = () => {
       setError('');
       setLoading(true);
       
-      await loginWithGoogle();
-      navigate('/dashboard');
+      const result = await loginWithGoogle();
+      const userId = result.user.uid;
+      
+      // Update the user's account status to pending if it's a new account
+      await setDoc(doc(db, "users", userId), {
+        accountStatus: "pending"
+      }, { merge: true });
+      
+      alert('Your account will be pending until an admin approves it.');
+      navigate('/login');
     } catch (err) {
       setError('Failed to sign up with Google. Please try again.');
       console.error(err);
