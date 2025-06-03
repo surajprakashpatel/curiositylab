@@ -4,17 +4,22 @@ import '../styles/client.css';
 import { db } from '../services/firebase';
 import { collection, getDocs, query, where, orderBy, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { useGithub } from '../contexts/GithubContext';
 import { useNavigate } from 'react-router-dom';
 
 const Client = () => {
   const navigate = useNavigate();
   const { currentUser, userProfile, logout } = useAuth();
+  const { fetchGithubApi, githubToken } = useGithub();
   const [projects, setProjects] = useState([]);
   const [expandedProjects, setExpandedProjects] = useState({});
   const [projectDetails, setProjectDetails] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') !== 'false');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
+  const [commits, setCommits] = useState([]);
+  const [repoLoading, setRepoLoading] = useState(false);
+  const [repoError, setRepoError] = useState(null);
 
   // Check if user is client
   useEffect(() => {
@@ -273,6 +278,116 @@ const Client = () => {
     return new Date(timestamp).toLocaleDateString();
   };
 
+  // Fetch repository commits
+  useEffect(() => {
+    const fetchRepositoryCommits = async () => {
+      if (!currentUser) return;
+      
+      try {
+        setRepoLoading(true);
+        setRepoError(null);
+        
+        // First approach: Try to find projects with githubRepo field
+        const projectsWithRepos = projects.filter(p => p.githubRepo);
+          
+        if (projectsWithRepos.length === 0) {
+          console.log('No projects with GitHub repositories found');
+          setCommits([]);
+          setRepoLoading(false);
+          return;
+        }
+        
+        console.log(`Found ${projectsWithRepos.length} projects with GitHub repositories`);
+          
+        // Extract repository information from projects
+        const allCommits = [];
+        let successfulRepos = 0;
+          
+        for (const project of projectsWithRepos) {
+          if (!project.githubRepo) continue;
+            
+          try {
+            // Parse repository URL to get owner and repo name
+            const url = new URL(project.githubRepo);
+            const pathParts = url.pathname.split('/').filter(Boolean);
+              
+            if (pathParts.length < 2) {
+              console.error(`Invalid repository URL format for project ${project.name || project.title}: ${project.githubRepo}`);
+              continue;
+            }
+              
+            const owner = pathParts[0];
+            const repo = pathParts[1];
+              
+            // Use the GitHub context to fetch data with centralized token
+            console.log(`Fetching commits for ${owner}/${repo}`);
+            
+            try {
+              const commitsData = await fetchGithubApi(`/repos/${owner}/${repo}/commits?per_page=10`);
+              
+              const repoCommits = commitsData.map(commit => ({
+                id: commit.sha,
+                message: commit.commit.message,
+                author: commit.commit.author.name,
+                date: commit.commit.author.date,
+                projectName: project.name || project.title,
+                repositoryUrl: project.githubRepo,
+                commitUrl: commit.html_url
+              }));
+                
+              allCommits.push(...repoCommits);
+              successfulRepos++;
+              console.log(`Found ${repoCommits.length} commits for ${project.name || project.title}`);
+            } catch (error) {
+              console.error(`Failed to fetch commits for ${owner}/${repo}:`, error.message);
+              // Continue with other repositories even if one fails
+            }
+          } catch (error) {
+            console.error(`Error processing repository for project ${project.name || project.title}:`, error.message);
+          }
+        }
+        
+        console.log(`Successfully fetched commits from ${successfulRepos} of ${projectsWithRepos.length} repositories`);
+          
+        if (allCommits.length === 0) {
+          setRepoError('No commits found in any repository. Check repository access permissions.');
+        } else {
+          // Sort all commits by date (newest first)
+          allCommits.sort((a, b) => new Date(b.date) - new Date(a.date));
+          console.log(`Total commits found: ${allCommits.length}`);
+        }
+          
+        setCommits(allCommits);
+        setRepoLoading(false);
+      } catch (error) {
+        console.error('Error fetching repository commits:', error);
+        setRepoError(`Failed to load repository data: ${error.message}`);
+        setRepoLoading(false);
+      }
+    };
+
+    fetchRepositoryCommits();
+  }, [currentUser, projects, fetchGithubApi]);
+  
+  // Format date for commits
+  const formatCommitDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  // Truncate commit message
+  const truncateMessage = (message, maxLength = 100) => {
+    if (!message) return '';
+    if (message.length <= maxLength) return message;
+    return message.substring(0, maxLength) + '...';
+  };
+
   return (
     <div className={`erp-container fullscreen-page ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar */}
@@ -457,24 +572,37 @@ const Client = () => {
           </div>
 
           <div className="recent-activity">
-            <h2>Recent Activity</h2>
+            <h2>Repository Activity</h2>
             <div className="activity-timeline">
-              {projects.length > 0 ? (
+              {repoLoading ? (
+                <div className="loading">Loading commit history...</div>
+              ) : repoError ? (
+                <div className="error-message">{repoError}</div>
+              ) : commits.length > 0 ? (
                 <div className="timeline-items">
-                  {projects.slice(0, 5).map(project => (
-                    <div className="timeline-item" key={project.id}>
+                  {commits.map((commit, index) => (
+                    <div 
+                      className="timeline-item" 
+                      key={commit.id}
+                      style={{"--index": index}}
+                    >
                       <div className="timeline-marker"></div>
                       <div className="timeline-content">
-                        <h4>{project.name} - {project.status}</h4>
-                        <p>{project.description || 'No description available'}</p>
-                        <small>{project.createdAt ? new Date(project.createdAt).toLocaleString() : 'N/A'}</small>
+                        <h4>
+                          <a href={commit.commitUrl} target="_blank" rel="noopener noreferrer" className="commit-link">
+                            {truncateMessage(commit.message, 70)}
+                          </a>
+                        </h4>
+                        <p>Repository: {commit.projectName}</p>
+                        <p>Author: {commit.author}</p>
+                        <small>{formatCommitDate(commit.date)}</small>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="empty-state">
-                  <p>No recent activity to display.</p>
+                  <p>No repository commits found. Make sure your projects have linked repositories.</p>
                 </div>
               )}
             </div>
