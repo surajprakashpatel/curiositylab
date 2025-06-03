@@ -473,21 +473,54 @@ const ProjectViewModal = ({ isOpen, onClose, project, currentUser, userName }) =
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="assignedTo">Assigned To</label>
-                  <select
-                    id="assignedTo"
-                    name="assignedTo"
-                    multiple
-                    value={projectData?.assignedTo || []}
-                    onChange={handleMultiSelectChange}
-                    className="multi-select"
-                  >
-                    {users.map(user => (
-                      <option key={user.id} value={user.id}>
-                        {user.displayName || user.username || user.email}
-                      </option>
-                    ))}
-                  </select>
-                  <small>Hold Ctrl/Cmd to select multiple users</small>
+                  <div className="user-selection-container">
+                    <div className="selected-users">
+                      {(projectData?.assignedTo || []).map(userId => {
+                        const user = users.find(u => u.id === userId);
+                        return user ? (
+                          <div key={userId} className="selected-user-chip">
+                            <span>{user.displayName || user.username || user.email}</span>
+                            <button 
+                              type="button" 
+                              className="remove-user-btn"
+                              onClick={() => {
+                                setProjectData(prev => ({
+                                  ...prev,
+                                  assignedTo: prev.assignedTo.filter(id => id !== userId)
+                                }));
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                    <div className="user-dropdown-container">
+                      <select
+                        className="user-dropdown"
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setProjectData(prev => ({
+                              ...prev,
+                              assignedTo: [...(prev.assignedTo || []), e.target.value]
+                            }));
+                            e.target.value = ''; // Reset dropdown after selection
+                          }
+                        }}
+                        value=""
+                      >
+                        <option value="">Add user...</option>
+                        {users
+                          .filter(user => !(projectData?.assignedTo || []).includes(user.id))
+                          .map(user => (
+                            <option key={user.id} value={user.id}>
+                              {user.displayName || user.username || user.email}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="form-group">

@@ -463,6 +463,20 @@ const Projects = () => {
                   </div>
                   <div className="tasks-panel-actions">
                     <button 
+                      className="add-task-btn" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsViewModalOpen(true);
+                        // Focus on the task input when the modal opens
+                        setTimeout(() => {
+                          const taskInput = document.querySelector('.add-task-form input[name="title"]');
+                          if (taskInput) taskInput.focus();
+                        }, 300);
+                      }}
+                    >
+                      + Add Task
+                    </button>
+                    <button 
                       className="edit-project-btn" 
                       onClick={(e) => {
                         e.stopPropagation();

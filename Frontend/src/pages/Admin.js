@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/tasks.css';
 import '../styles/admin.css';
 import { db } from '../services/firebase';
-import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc, where } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc, where, collectionGroup } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,8 +11,10 @@ const Admin = () => {
   const { currentUser, userProfile, fetchUserProfile, logout } = useAuth();
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') !== 'false');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
-  const [activeTab, setActiveTab] = useState('tasks');
-  const [tasks, setTasks] = useState([]);
+  const [activeTab, setActiveTab] = useState('projects');
+  const [projects, setProjects] = useState([]);
+  const [expandedProjects, setExpandedProjects] = useState({});
+  // Removed tasks state
   const [users, setUsers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [userTab, setUserTab] = useState('all');
@@ -34,8 +36,8 @@ const Admin = () => {
           navigate('/dashboard');
         } else {
           // Load data for admin
-          fetchTasks();
           fetchUsers();
+          fetchAllProjects();
         }
       });
     } else {
@@ -81,24 +83,7 @@ const Admin = () => {
       .substring(0, 2);
   };
 
-  const fetchTasks = async () => {
-    try {
-      setIsLoading(true);
-      const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      
-      const fetchedTasks = [];
-      querySnapshot.forEach((doc) => {
-        fetchedTasks.push({ id: doc.id, ...doc.data() });
-      });
-      
-      setTasks(fetchedTasks);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      setIsLoading(false);
-    }
-  };
+  // Removed fetchTasks function
 
   const fetchUsers = async () => {
     try {
@@ -137,51 +122,7 @@ const Admin = () => {
     }
   };
 
-  const renderTasksTable = () => {
-    return (
-      <div className="admin-table-container">
-        <h2>All Tasks</h2>
-        {isLoading ? (
-          <div className="loading">Loading tasks...</div>
-        ) : tasks.length === 0 ? (
-          <div className="empty-state">No tasks found</div>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Project Type</th>
-                <th>Due Date</th>
-                <th>Assigned To</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map(task => (
-                <tr key={task.id}>
-                  <td>{task.title}</td>
-                  <td className="description-cell">{task.description}</td>
-                  <td>
-                    <span className={`status-badge ${task.status}`}>
-                      {task.status}
-                    </span>
-                  </td>
-                  <td>{task.projectType}</td>
-                  <td>{task.lastDate}</td>
-                  <td>
-                    {Array.isArray(task.assignedTo) ? 
-                      task.assignedTo.join(', ') : 
-                      (task.assignedTo || 'Unassigned')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    );
-  };
+  // Removed renderTasksTable function
 
   const [selectedAccountType, setSelectedAccountType] = useState({});
 
@@ -236,6 +177,244 @@ const Admin = () => {
       console.error('Error rejecting user:', error);
       alert('Failed to reject user. Please try again.');
     }
+  };
+
+  const fetchAllProjects = async () => {
+    try {
+      setIsLoading(true);
+      const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      const fetchedProjects = [];
+      
+      // Process each project
+      for (const projectDoc of querySnapshot.docs) {
+        const projectData = { id: projectDoc.id, ...projectDoc.data() };
+        
+        // Fetch tasks for this project
+        const tasksQuery = query(collection(db, 'projects', projectDoc.id, 'tasks'));
+        const tasksSnapshot = await getDocs(tasksQuery);
+        
+        const projectTasks = [];
+        tasksSnapshot.forEach((taskDoc) => {
+          projectTasks.push({ id: taskDoc.id, ...taskDoc.data() });
+        });
+        
+        // Sort tasks: uncompleted first, then completed
+        projectTasks.sort((a, b) => {
+          if ((a.completed || false) === (b.completed || false)) return 0;
+          return (a.completed || false) ? 1 : -1;
+        });
+        
+        // Fetch user details for assigned users and managers
+        const assignedUsers = [];
+        const managerUsers = [];
+        
+        // Process assigned users
+        if (Array.isArray(projectData.assignedTo)) {
+          for (const userId of projectData.assignedTo) {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', userId));
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                assignedUsers.push({
+                  id: userId,
+                  name: userData.displayName || userData.username || userData.email || 'Unknown User'
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching assigned user:', error);
+            }
+          }
+        }
+        
+        // Process managers
+        if (Array.isArray(projectData.managers)) {
+          for (const userId of projectData.managers) {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', userId));
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                managerUsers.push({
+                  id: userId,
+                  name: userData.displayName || userData.username || userData.email || 'Unknown User'
+                });
+              }
+            } catch (error) {
+              console.error('Error fetching manager user:', error);
+            }
+          }
+        }
+        
+        // Fetch client name if available
+        let clientName = 'No Client';
+        if (projectData.clientId) {
+          try {
+            const clientDoc = await getDoc(doc(db, 'users', projectData.clientId));
+            if (clientDoc.exists()) {
+              const clientData = clientDoc.data();
+              clientName = clientData.displayName || clientData.username || clientData.email || 'Unknown Client';
+            }
+          } catch (error) {
+            console.error('Error fetching client details:', error);
+          }
+        }
+        
+        // Add enhanced project data to the list
+        fetchedProjects.push({
+          ...projectData,
+          tasks: projectTasks,
+          assignedUsers,
+          managerUsers,
+          clientName
+        });
+      }
+      
+      setProjects(fetchedProjects);
+      setIsLoading(false);
+      console.log('Fetched projects:', fetchedProjects);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setIsLoading(false);
+    }
+  };
+  
+  const toggleProjectExpansion = (projectId) => {
+    setExpandedProjects(prev => ({
+      ...prev,
+      [projectId]: !prev[projectId]
+    }));
+  };
+
+  const renderProjectsTable = () => {
+    return (
+      <div className="admin-table-container projects-table">
+        <h2>All Projects</h2>
+        {isLoading ? (
+          <div className="loading">Loading projects...</div>
+        ) : projects.length === 0 ? (
+          <div className="empty-state">No projects found</div>
+        ) : (
+          <div className="projects-list">
+            {projects.map(project => (
+              <div key={project.id} className="project-card admin-project-card">
+                <div 
+                  className="project-header" 
+                  onClick={() => toggleProjectExpansion(project.id)}
+                >
+                  <div className="project-title-section">
+                    <h3>{project.title}</h3>
+                    <span className={`status-badge ${project.status}`}>
+                      {project.status === 'todo' ? 'To Do' : 
+                       project.status === 'inProgress' ? 'In Progress' : 'Completed'}
+                    </span>
+                  </div>
+                  <div className="project-expand-icon">
+                    {expandedProjects[project.id] ? '▼' : '►'}
+                  </div>
+                </div>
+                
+                {expandedProjects[project.id] && (
+                  <div className="project-details">
+                    <div className="project-info">
+                      <p><strong>Description:</strong> {project.description}</p>
+                      <p><strong>Client:</strong> {project.clientName}</p>
+                      <p>
+                        <strong>Start Date:</strong> 
+                        {project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Not set'}
+                      </p>
+                      {project.dueDate && (
+                        <p>
+                          <strong>Due Date:</strong> 
+                          {new Date(project.dueDate).toLocaleDateString()}
+                        </p>
+                      )}
+                      <div className="project-links">
+                        {project.githubRepo && (
+                          <a 
+                            href={project.githubRepo} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="github-link"
+                          >
+                            📂 GitHub Repository
+                          </a>
+                        )}
+                        {project.liveLink && (
+                          <a 
+                            href={project.liveLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="live-link"
+                          >
+                            🌐 Live Site
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="project-users">
+                      <div className="assigned-users">
+                        <h4>Assigned Users:</h4>
+                        {project.assignedUsers.length > 0 ? (
+                          <div className="user-chips">
+                            {project.assignedUsers.map(user => (
+                              <span key={user.id} className="user-chip">{user.name}</span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No assigned users</p>
+                        )}
+                      </div>
+                      
+                      <div className="project-managers">
+                        <h4>Project Managers:</h4>
+                        {project.managerUsers.length > 0 ? (
+                          <div className="user-chips">
+                            {project.managerUsers.map(user => (
+                              <span key={user.id} className="manager-chip">{user.name}</span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No project managers</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="project-tasks">
+                      <h4>Tasks:</h4>
+                      {project.tasks.length > 0 ? (
+                        <ul className="tasks-list">
+                          {project.tasks.map(task => (
+                            <li key={task.id} className={`task-item ${task.completed ? 'completed' : ''}`}>
+                              <div className="task-content">
+                                <span className="task-status-icon">
+                                  {task.completed ? '✓' : '○'}
+                                </span>
+                                <span className="task-title">{task.title}</span>
+                              </div>
+                              <div className="task-meta">
+                                {task.dueDate && (
+                                  <span className="task-due-date">
+                                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No tasks for this project</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderUsersTable = () => {
@@ -356,8 +535,8 @@ const Admin = () => {
         </div>
         <nav>
           <ul>
-            <li className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>
-              <span className="icon">📋</span> {!sidebarCollapsed && <span>Tasks</span>}
+            <li className={activeTab === 'projects' ? 'active' : ''} onClick={() => setActiveTab('projects')}>
+              <span className="icon">📁</span> {!sidebarCollapsed && <span>Projects</span>}
             </li>
             <li className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
               <span className="icon">👥</span> {!sidebarCollapsed && <span>Users</span>}
@@ -396,10 +575,10 @@ const Admin = () => {
         <div className="admin-content">
           <div className="admin-tabs">
             <button 
-              className={`tab-btn ${activeTab === 'tasks' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tasks')}
+              className={`tab-btn ${activeTab === 'projects' ? 'active' : ''}`}
+              onClick={() => setActiveTab('projects')}
             >
-              Tasks <span className="count-badge">{tasks.length}</span>
+              Projects <span className="count-badge">{projects.length}</span>
             </button>
             <button 
               className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
@@ -413,7 +592,7 @@ const Admin = () => {
           </div>
 
           <div className="admin-panel">
-            {activeTab === 'tasks' ? renderTasksTable() : renderUsersTable()}
+            {activeTab === 'projects' ? renderProjectsTable() : renderUsersTable()}
           </div>
         </div>
       </main>
