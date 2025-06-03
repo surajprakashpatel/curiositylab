@@ -351,18 +351,12 @@ const Client = () => {
                   const projectDetail = projectDetails[project.id] || project;
                   const isExpanded = expandedProjects[project.id] || false;
                   const tasks = projectDetail.tasks || [];
-                  const assignedUsers = projectDetail.assignedUsers || [];
-                  const managers = projectDetail.managerUsers || [];
-                  
-                  console.log('Rendering project:', project.name || project.title, projectDetail);
                   
                   return (
                     <div key={project.id} className="admin-project-card">
-                      <div 
-                        className="project-header" 
-                        onClick={() => toggleProjectExpansion(project.id)}
-                      >
-                        <div className="project-title-section">
+                      <div className="project-header">
+                        <div className="project-main-info">
+                          <h3>{project.name || project.title}</h3>
                           <span 
                             className="status-badge" 
                             style={{ backgroundColor: getStatusColor(project.status) }}
@@ -371,10 +365,17 @@ const Client = () => {
                              project.status === 'inProgress' ? 'In Progress' :
                              project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                           </span>
-                          <h3>{project.name || project.title}</h3>
-                        </div>
-                        <div className="project-expand-icon">
-                          {isExpanded ? '▼' : '►'}
+                          {project.liveLink && (
+                            <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="live-link">
+                              🔗 Live Link
+                            </a>
+                          )}
+                          <button 
+                            className="details-button"
+                            onClick={() => toggleProjectExpansion(project.id)}
+                          >
+                            {isExpanded ? 'Hide Details' : 'Show Details'}
+                          </button>
                         </div>
                       </div>
                       
@@ -383,28 +384,18 @@ const Client = () => {
                           <div className="project-info">
                             <h4>Project Details</h4>
                             <p><strong>Description:</strong> {project.description || 'No description provided'}</p>
-                            <p><strong>Project Name:</strong> {project.name || project.title}</p>
                             <p><strong>Start Date:</strong> {formatDate(project.startDate)}</p>
                             <p><strong>Due Date:</strong> {formatDate(project.dueDate)}</p>
                             <p><strong>Created:</strong> {formatDate(project.createdAt)}</p>
-                            <p><strong>Status:</strong> {project.status}</p>
                             <p><strong>Type:</strong> {project.projectType || 'Not specified'}</p>
-                            
-                            {project.liveLink && (
-                              <div className="project-links">
-                                <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="live-link">
-                                  🔗 Live Link
-                                </a>
-                              </div>
-                            )}
                           </div>
                           
                           <div className="project-users">
                             <div className="assigned-users">
                               <h4>Assigned Team</h4>
-                              {assignedUsers.length > 0 ? (
+                              {projectDetail.assignedUsers?.length > 0 ? (
                                 <div className="user-chips">
-                                  {assignedUsers.map(user => (
+                                  {projectDetail.assignedUsers.map(user => (
                                     <span key={user.id} className="user-chip">
                                       {user.displayName || user.email || 'Unknown'}
                                     </span>
@@ -417,9 +408,9 @@ const Client = () => {
                             
                             <div className="project-managers">
                               <h4>Project Managers</h4>
-                              {managers.length > 0 ? (
+                              {projectDetail.managerUsers?.length > 0 ? (
                                 <div className="user-chips">
-                                  {managers.map(manager => (
+                                  {projectDetail.managerUsers.map(manager => (
                                     <span key={manager.id} className="manager-chip">
                                       {manager.displayName || manager.email || 'Unknown'}
                                     </span>
@@ -430,34 +421,34 @@ const Client = () => {
                               )}
                             </div>
                           </div>
-                          
-                          <div className="project-tasks">
-                            <h4>Project Tasks ({tasks.length})</h4>
-                            {tasks.length > 0 ? (
-                              <ul className="tasks-list">
-                                {tasks.map(task => (
-                                  <li 
-                                    key={task.id} 
-                                    className={`task-item ${task.completed ? 'completed' : ''}`}
-                                  >
-                                    <div className="task-content">
-                                      <span className="task-status-icon">
-                                        {task.completed ? '✅' : '⬜'}
-                                      </span>
-                                      <span className="task-title">{task.title}</span>
-                                    </div>
-                                    <div className="task-meta">
-                                      Due: {formatDate(task.dueDate)}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p>No tasks for this project</p>
-                            )}
-                          </div>
                         </div>
                       )}
+                      
+                      <div className="project-tasks">
+                        <h4>Tasks</h4>
+                        {tasks.length > 0 ? (
+                          <ul className="tasks-list">
+                            {tasks.map(task => (
+                              <li 
+                                key={task.id} 
+                                className={`task-item ${task.completed ? 'completed' : ''}`}
+                              >
+                                <div className="task-content">
+                                  <span className="task-status-icon">
+                                    {task.completed ? '✅' : '⬜'}
+                                  </span>
+                                  <span className="task-title">{task.title}</span>
+                                </div>
+                                <div className="task-meta">
+                                  Due: {formatDate(task.dueDate)}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p>No tasks for this project</p>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
