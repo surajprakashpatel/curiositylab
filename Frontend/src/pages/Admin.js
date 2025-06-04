@@ -2,23 +2,37 @@ import React, { useState, useEffect } from 'react';
 import '../styles/tasks.css';
 import '../styles/admin.css';
 import { db } from '../services/firebase';
-import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc, where, collectionGroup } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, getDoc, updateDoc, where, collectionGroup, addDoc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { useGithub } from '../contexts/GithubContext';
 import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
   const navigate = useNavigate();
   const { currentUser, userProfile, fetchUserProfile, logout } = useAuth();
+  const { fetchGithubApi, githubToken } = useGithub();
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') !== 'false');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(localStorage.getItem('sidebarCollapsed') === 'true');
   const [activeTab, setActiveTab] = useState('projects');
   const [projects, setProjects] = useState([]);
   const [expandedProjects, setExpandedProjects] = useState({});
-  // Removed tasks state
   const [users, setUsers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [userTab, setUserTab] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Messages state
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [selectedRecipient, setSelectedRecipient] = useState('');
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  
+  // Activity state
+  const [projectCommits, setProjectCommits] = useState({});
+  const [allCommits, setAllCommits] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   // Set dark mode as default
   useEffect(() => {
@@ -38,12 +52,42 @@ const Admin = () => {
           // Load data for admin
           fetchUsers();
           fetchAllProjects();
+          fetchConversations();
         }
       });
     } else {
       navigate('/login');
     }
   }, [currentUser, navigate]);
+
+  // Fetch commits when projects are loaded and GitHub token is available
+  useEffect(() => {
+    if (projects.length > 0 && githubToken) {
+      fetchAllProjectCommits();
+    }
+  }, [projects, githubToken]);
+
+  // Listen for new messages when a conversation is selected
+  useEffect(() => {
+    if (!selectedConversation || !currentUser) return;
+
+    const conversationRef = doc(db, 'conversations', selectedConversation);
+    const messagesRef = collection(conversationRef, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedMessages = [];
+      snapshot.forEach((doc) => {
+        fetchedMessages.push({ id: doc.id, ...doc.data() });
+      });
+      setMessages(fetchedMessages);
+      
+      // Mark messages as read
+      markConversationAsRead(selectedConversation);
+    });
+
+    return () => unsubscribe();
+  }, [selectedConversation, currentUser]);
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -83,8 +127,6 @@ const Admin = () => {
       .substring(0, 2);
   };
 
-  // Removed fetchTasks function
-
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
@@ -121,8 +163,6 @@ const Admin = () => {
       console.error('Failed to log out', error);
     }
   };
-
-  // Removed renderTasksTable function
 
   const [selectedAccountType, setSelectedAccountType] = useState({});
 
@@ -286,6 +326,227 @@ const Admin = () => {
     }));
   };
 
+  const handleDeleteProject = async (projectId) => {
+    // Confirm before deletion
+    const confirmDelete = window.confirm("Are you sure you want to delete this project? This action cannot be undone.");
+    if (!confirmDelete) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // First delete all tasks associated with the project
+      const tasksQuery = query(collection(db, 'projects', projectId, 'tasks'));
+      const tasksSnapshot = await getDocs(tasksQuery);
+      
+      const batch = [];
+      tasksSnapshot.forEach((taskDoc) => {
+        const taskRef = doc(db, 'projects', projectId, 'tasks', taskDoc.id);
+        batch.push(deleteDoc(taskRef));
+      });
+      
+      // Wait for all task deletions to complete
+      await Promise.all(batch);
+      
+      // Now delete the project document
+      await deleteDoc(doc(db, 'projects', projectId));
+      
+      // Update local state
+      setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId));
+      
+      alert('Project deleted successfully');
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Messages functions
+  const fetchConversations = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Get all conversations where the current user is a participant
+      const q = query(
+        collection(db, 'conversations'),
+        where('participants', 'array-contains', currentUser.uid)
+      );
+      
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const conversationsList = [];
+        const unreadCountsObj = {};
+        
+        for (const conversationDoc of snapshot.docs) {
+          const conversationData = { id: conversationDoc.id, ...conversationDoc.data() };
+          
+          // Get the other user's ID (not the current user)
+          const otherUserId = conversationData.participants.find(id => id !== currentUser.uid);
+          
+          // Get the other user's details
+          try {
+            const userDoc = await getDoc(doc(db, 'users', otherUserId));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              conversationData.otherUser = {
+                id: otherUserId,
+                name: userData.displayName || userData.username || userData.email || 'Unknown User',
+                accountType: userData.accountType || 'user'
+              };
+            }
+          } catch (error) {
+            console.error('Error fetching user details for conversation:', error);
+            conversationData.otherUser = { id: otherUserId, name: 'Unknown User' };
+          }
+          
+          // Get the last message
+          const messagesRef = collection(conversationDoc.ref, 'messages');
+          const lastMessageQuery = query(messagesRef, orderBy('timestamp', 'desc'), where('timestamp', '!=', null));
+          const lastMessageSnapshot = await getDocs(lastMessageQuery);
+          
+          if (!lastMessageSnapshot.empty) {
+            const lastMessageDoc = lastMessageSnapshot.docs[0];
+            const lastMessageData = lastMessageDoc.data();
+            conversationData.lastMessage = {
+              text: lastMessageData.text,
+              timestamp: lastMessageData.timestamp ? lastMessageData.timestamp.toDate() : new Date(),
+              senderId: lastMessageData.senderId
+            };
+            
+            // Count unread messages for this conversation
+            const unreadQuery = query(
+              messagesRef,
+              where('read', '==', false),
+              where('senderId', '!=', currentUser.uid)
+            );
+            const unreadSnapshot = await getDocs(unreadQuery);
+            unreadCountsObj[conversationDoc.id] = unreadSnapshot.size;
+          } else {
+            conversationData.lastMessage = null;
+          }
+          
+          conversationsList.push(conversationData);
+        }
+        
+        // Sort conversations by last message timestamp (most recent first)
+        conversationsList.sort((a, b) => {
+          if (!a.lastMessage) return 1;
+          if (!b.lastMessage) return -1;
+          return b.lastMessage.timestamp - a.lastMessage.timestamp;
+        });
+        
+        setConversations(conversationsList);
+        setUnreadCounts(unreadCountsObj);
+        setIsLoading(false);
+      });
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || (!selectedRecipient && !selectedConversation) || !currentUser) return;
+    
+    try {
+      // Check if a conversation already exists with this recipient
+      let conversationId = selectedConversation;
+      
+      if (!conversationId) {
+        // Create a new conversation
+        const conversationRef = await addDoc(collection(db, 'conversations'), {
+          participants: [currentUser.uid, selectedRecipient],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        
+        conversationId = conversationRef.id;
+        setSelectedConversation(conversationId);
+      } else {
+        // Update the conversation's updatedAt timestamp
+        await updateDoc(doc(db, 'conversations', conversationId), {
+          updatedAt: serverTimestamp()
+        });
+      }
+      
+      // Add the message to the conversation
+      await addDoc(collection(db, 'conversations', conversationId, 'messages'), {
+        text: newMessage,
+        senderId: currentUser.uid,
+        timestamp: serverTimestamp(),
+        read: false
+      });
+      
+      // Clear the input field
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    }
+  };
+
+  const handleSelectConversation = (conversationId) => {
+    setSelectedConversation(conversationId);
+    setMessages([]);
+  };
+
+  const handleSelectNewRecipient = (userId) => {
+    // Check if conversation already exists with this user
+    const existingConversation = conversations.find(conv => 
+      conv.participants.includes(userId)
+    );
+    
+    if (existingConversation) {
+      setSelectedConversation(existingConversation.id);
+    } else {
+      setSelectedConversation(null);
+      setSelectedRecipient(userId);
+      setMessages([]);
+    }
+  };
+
+  const markConversationAsRead = async (conversationId) => {
+    if (!conversationId || !currentUser) return;
+    
+    try {
+      const conversationRef = doc(db, 'conversations', conversationId);
+      const messagesRef = collection(conversationRef, 'messages');
+      
+      // Get all unread messages not sent by current user
+      const unreadQuery = query(
+        messagesRef,
+        where('read', '==', false),
+        where('senderId', '!=', currentUser.uid)
+      );
+      
+      const unreadSnapshot = await getDocs(unreadQuery);
+      
+      // Update each message to mark as read
+      const batch = [];
+      unreadSnapshot.forEach((doc) => {
+        batch.push(updateDoc(doc.ref, { read: true }));
+      });
+      
+      await Promise.all(batch);
+      
+      // Update unread counts
+      setUnreadCounts(prev => ({
+        ...prev,
+        [conversationId]: 0
+      }));
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
+  };
+
+  const getTotalUnreadCount = () => {
+    return Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+  };
+
   const renderProjectsTable = () => {
     return (
       <div className="admin-table-container projects-table">
@@ -299,18 +560,32 @@ const Admin = () => {
             {projects.map(project => (
               <div key={project.id} className="project-card admin-project-card">
                 <div 
-                  className="project-header" 
-                  onClick={() => toggleProjectExpansion(project.id)}
+                  className="project-header"
                 >
-                  <div className="project-title-section">
+                  <div className="project-title-section" onClick={() => toggleProjectExpansion(project.id)}>
                     <h3>{project.title}</h3>
                     <span className={`status-badge ${project.status}`}>
                       {project.status === 'todo' ? 'To Do' : 
                        project.status === 'inProgress' ? 'In Progress' : 'Completed'}
                     </span>
                   </div>
-                  <div className="project-expand-icon">
-                    {expandedProjects[project.id] ? '▼' : '►'}
+                  <div className="project-actions">
+                    <button 
+                      className="delete-project-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteProject(project.id);
+                      }}
+                      title="Delete Project"
+                    >
+                      🗑️
+                    </button>
+                    <div 
+                      className="project-expand-icon"
+                      onClick={() => toggleProjectExpansion(project.id)}
+                    >
+                      {expandedProjects[project.id] ? '▼' : '►'}
+                    </div>
                   </div>
                 </div>
                 
@@ -526,6 +801,288 @@ const Admin = () => {
     );
   };
 
+  const renderMessagesTab = () => {
+    return (
+      <div className="admin-table-container messages-container">
+        <h2>Messages</h2>
+        <div className="messaging-interface">
+          <div className="conversations-list">
+            <div className="conversations-header">
+              <h3>Conversations</h3>
+              <div className="new-message-dropdown">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) handleSelectNewRecipient(e.target.value);
+                    e.target.value = "";
+                  }}
+                  className="recipient-select"
+                >
+                  <option value="">New Message</option>
+                  <optgroup label="Clients">
+                    {users
+                      .filter(user => user.accountType === 'client' && user.accountStatus === 'active')
+                      .map(user => (
+                        <option key={user.id} value={user.id}>
+                          {user.displayName || user.username || user.email}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Users">
+                    {users
+                      .filter(user => 
+                        (user.accountType === 'user' || !user.accountType) && 
+                        user.accountStatus === 'active'
+                      )
+                      .map(user => (
+                        <option key={user.id} value={user.id}>
+                          {user.displayName || user.username || user.email}
+                        </option>
+                      ))}
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            
+            <div className="conversation-items">
+              {conversations.length === 0 ? (
+                <div className="empty-state">No conversations yet</div>
+              ) : (
+                conversations.map(conversation => (
+                  <div 
+                    key={conversation.id} 
+                    className={`conversation-item ${selectedConversation === conversation.id ? 'active' : ''}`}
+                    onClick={() => handleSelectConversation(conversation.id)}
+                  >
+                    <div className="conversation-avatar">
+                      <span className={`user-type-indicator ${conversation.otherUser?.accountType || 'user'}`}>
+                        {conversation.otherUser?.name?.charAt(0).toUpperCase() || '?'}
+                      </span>
+                    </div>
+                    <div className="conversation-details">
+                      <div className="conversation-header">
+                        <h4>{conversation.otherUser?.name || 'Unknown User'}</h4>
+                        {unreadCounts[conversation.id] > 0 && (
+                          <span className="unread-badge">{unreadCounts[conversation.id]}</span>
+                        )}
+                      </div>
+                      {conversation.lastMessage && (
+                        <div className="conversation-preview">
+                          <p>
+                            {conversation.lastMessage.senderId === currentUser.uid ? 'You: ' : ''}
+                            {conversation.lastMessage.text.length > 30 
+                              ? conversation.lastMessage.text.substring(0, 30) + '...' 
+                              : conversation.lastMessage.text}
+                          </p>
+                          <span className="message-time">
+                            {conversation.lastMessage.timestamp.toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          <div className="message-content">
+            {selectedConversation || selectedRecipient ? (
+              <>
+                <div className="message-header">
+                  <h3>
+                    {selectedConversation 
+                      ? conversations.find(c => c.id === selectedConversation)?.otherUser?.name || 'Unknown User'
+                      : users.find(u => u.id === selectedRecipient)?.displayName || 
+                        users.find(u => u.id === selectedRecipient)?.username || 
+                        users.find(u => u.id === selectedRecipient)?.email || 
+                        'New Message'}
+                  </h3>
+                  <span className="user-type">
+                    {selectedConversation 
+                      ? `(${conversations.find(c => c.id === selectedConversation)?.otherUser?.accountType || 'user'})`
+                      : `(${users.find(u => u.id === selectedRecipient)?.accountType || 'user'})`}
+                  </span>
+                </div>
+                
+                <div className="messages-list">
+                  {messages.length === 0 ? (
+                    <div className="empty-state">No messages yet</div>
+                  ) : (
+                    messages.map(message => (
+                      <div 
+                        key={message.id} 
+                        className={`message-bubble ${message.senderId === currentUser.uid ? 'sent' : 'received'}`}
+                      >
+                        <div className="message-text">{message.text}</div>
+                        <div className="message-meta">
+                          {message.timestamp ? (
+                            <span className="message-time">
+                              {message.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          ) : (
+                            <span className="message-time">Sending...</span>
+                          )}
+                          {message.senderId === currentUser.uid && (
+                            <span className="message-status">
+                              {message.read ? '✓✓' : '✓'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="message-input">
+                  <input 
+                    type="text" 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <button 
+                    className="send-button"
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="no-conversation-selected">
+                <div className="empty-state">
+                  <p>Select a conversation or start a new message</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const fetchAllProjectCommits = async () => {
+    if (!githubToken) return;
+    
+    setActivityLoading(true);
+    const commits = {};
+    const allCommitsArray = [];
+    
+    try {
+      for (const project of projects) {
+        if (project.githubRepo) {
+          // Extract owner and repo from GitHub URL
+          const match = project.githubRepo.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+          if (match) {
+            const owner = match[1];
+            const repo = match[2];
+            
+            try {
+              const response = await fetchGithubApi(`/repos/${owner}/${repo}/commits`);
+              
+              if (response && Array.isArray(response)) {
+                // Add project info to each commit
+                const projectCommits = response.map(commit => ({
+                  ...commit,
+                  projectId: project.id,
+                  projectTitle: project.title,
+                  repo: repo,
+                  owner: owner
+                }));
+                
+                commits[project.id] = projectCommits;
+                allCommitsArray.push(...projectCommits);
+              }
+            } catch (error) {
+              console.error(`Error fetching commits for ${project.title}:`, error);
+            }
+          }
+        }
+      }
+      
+      // Sort all commits by date (newest first)
+      allCommitsArray.sort((a, b) => {
+        const dateA = new Date(a.commit.author.date);
+        const dateB = new Date(b.commit.author.date);
+        return dateB - dateA;
+      });
+      
+      setProjectCommits(commits);
+      setAllCommits(allCommitsArray);
+    } catch (error) {
+      console.error('Error fetching project commits:', error);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  const renderActivityTab = () => {
+    return (
+      <div className="admin-table-container">
+        <h2>Project Activity</h2>
+        <div className="activity-controls">
+          <button 
+            className="refresh-btn"
+            onClick={fetchAllProjectCommits}
+            disabled={activityLoading}
+          >
+            {activityLoading ? 'Refreshing...' : 'Refresh Activity'}
+          </button>
+        </div>
+        
+        {activityLoading ? (
+          <div className="loading">Loading project activity...</div>
+        ) : allCommits.length === 0 ? (
+          <div className="empty-state">No commits found. Make sure projects have valid GitHub repositories.</div>
+        ) : (
+          <div className="commits-container">
+            {allCommits.map((commit, index) => (
+              <div key={index} className="commit-card">
+                <div className="commit-header">
+                  <div className="commit-project">
+                    <span className="project-badge">{commit.projectTitle}</span>
+                    <span className="repo-badge">{commit.owner}/{commit.repo}</span>
+                  </div>
+                  <div className="commit-date">
+                    {new Date(commit.commit.author.date).toLocaleString()}
+                  </div>
+                </div>
+                <div className="commit-message">
+                  {commit.commit.message}
+                </div>
+                <div className="commit-author">
+                  {commit.author ? (
+                    <div className="author-info">
+                      <img 
+                        src={commit.author.avatar_url} 
+                        alt={commit.author.login}
+                        className="author-avatar"
+                      />
+                      <span className="author-name">{commit.author.login}</span>
+                    </div>
+                  ) : (
+                    <span className="author-name">{commit.commit.author.name}</span>
+                  )}
+                  <a 
+                    href={commit.html_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="commit-link"
+                  >
+                    View on GitHub
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={`erp-container fullscreen-page ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar */}
@@ -540,6 +1097,23 @@ const Admin = () => {
             </li>
             <li className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
               <span className="icon">👥</span> {!sidebarCollapsed && <span>Users</span>}
+            </li>
+            <li className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>
+              <span className="icon">💬</span> 
+              {!sidebarCollapsed && (
+                <span>
+                  Messages
+                  {getTotalUnreadCount() > 0 && (
+                    <span className="unread-badge sidebar-badge">{getTotalUnreadCount()}</span>
+                  )}
+                </span>
+              )}
+              {sidebarCollapsed && getTotalUnreadCount() > 0 && (
+                <span className="unread-badge sidebar-badge-collapsed">{getTotalUnreadCount()}</span>
+              )}
+            </li>
+            <li className={activeTab === 'activity' ? 'active' : ''} onClick={() => setActiveTab('activity')}>
+              <span className="icon">📊</span> {!sidebarCollapsed && <span>Activity</span>}
             </li>
             <li onClick={() => navigate('/dashboard')}>
               <span className="icon">🔄</span> {!sidebarCollapsed && <span>Switch to Tasks</span>}
@@ -589,10 +1163,28 @@ const Admin = () => {
                 <span className="pending-badge">{pendingUsers.length} pending</span>
               )}
             </button>
+            <button 
+              className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+              onClick={() => setActiveTab('messages')}
+            >
+              Messages
+              {getTotalUnreadCount() > 0 && (
+                <span className="pending-badge">{getTotalUnreadCount()} unread</span>
+              )}
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
+              onClick={() => setActiveTab('activity')}
+            >
+              Activity
+            </button>
           </div>
 
           <div className="admin-panel">
-            {activeTab === 'projects' ? renderProjectsTable() : renderUsersTable()}
+            {activeTab === 'projects' ? renderProjectsTable() : 
+             activeTab === 'users' ? renderUsersTable() : 
+             activeTab === 'messages' ? renderMessagesTab() :
+             renderActivityTab()}
           </div>
         </div>
       </main>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/tasks.css';
 import '../styles/client.css';
 import { db } from '../services/firebase';
-import { collection, getDocs, query, where, orderBy, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, doc, getDoc, addDoc, serverTimestamp, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useGithub } from '../contexts/GithubContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,15 @@ const Client = () => {
   const [commits, setCommits] = useState([]);
   const [repoLoading, setRepoLoading] = useState(false);
   const [repoError, setRepoError] = useState(null);
+  
+  // Messages state
+  const [activeTab, setActiveTab] = useState('projects');
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [admins, setAdmins] = useState([]);
 
   // Check if user is client
   useEffect(() => {
@@ -206,11 +215,132 @@ const Client = () => {
     fetchProjects();
   }, [currentUser, userProfile]);
   
-  // Log projects for debugging
+  // Fetch conversations and admin users
   useEffect(() => {
-    console.log('Current projects:', projects);
-    console.log('Project details:', projectDetails);
-  }, [projects, projectDetails]);
+    if (!currentUser) return;
+    
+    // Fetch admin users for messaging
+    const fetchAdmins = async () => {
+      try {
+        const q = query(collection(db, 'users'), where('accountType', '==', 'admin'));
+        const querySnapshot = await getDocs(q);
+        
+        const adminsList = [];
+        querySnapshot.forEach((doc) => {
+          adminsList.push({ id: doc.id, ...doc.data() });
+        });
+        
+        setAdmins(adminsList);
+      } catch (error) {
+        console.error('Error fetching admins:', error);
+      }
+    };
+    
+    // Fetch conversations
+    const fetchConversations = async () => {
+      try {
+        const q = query(
+          collection(db, 'conversations'),
+          where('participants', 'array-contains', currentUser.uid)
+        );
+        
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+          const conversationsList = [];
+          const unreadCountsObj = {};
+          
+          for (const conversationDoc of snapshot.docs) {
+            const conversationData = { id: conversationDoc.id, ...conversationDoc.data() };
+            
+            // Get the other user's ID (not the current user)
+            const otherUserId = conversationData.participants.find(id => id !== currentUser.uid);
+            
+            // Get the other user's details
+            try {
+              const userDoc = await getDoc(doc(db, 'users', otherUserId));
+              if (userDoc.exists()) {
+                const userData = userDoc.data();
+                conversationData.otherUser = {
+                  id: otherUserId,
+                  name: userData.displayName || userData.username || userData.email || 'Unknown User',
+                  accountType: userData.accountType || 'user'
+                };
+              }
+            } catch (error) {
+              console.error('Error fetching user details for conversation:', error);
+              conversationData.otherUser = { id: otherUserId, name: 'Unknown User' };
+            }
+            
+            // Get the last message
+            const messagesRef = collection(conversationDoc.ref, 'messages');
+            const lastMessageQuery = query(messagesRef, orderBy('timestamp', 'desc'), where('timestamp', '!=', null));
+            const lastMessageSnapshot = await getDocs(lastMessageQuery);
+            
+            if (!lastMessageSnapshot.empty) {
+              const lastMessageDoc = lastMessageSnapshot.docs[0];
+              const lastMessageData = lastMessageDoc.data();
+              conversationData.lastMessage = {
+                text: lastMessageData.text,
+                timestamp: lastMessageData.timestamp ? lastMessageData.timestamp.toDate() : new Date(),
+                senderId: lastMessageData.senderId
+              };
+              
+              // Count unread messages for this conversation
+              const unreadQuery = query(
+                messagesRef,
+                where('read', '==', false),
+                where('senderId', '!=', currentUser.uid)
+              );
+              const unreadSnapshot = await getDocs(unreadQuery);
+              unreadCountsObj[conversationDoc.id] = unreadSnapshot.size;
+            } else {
+              conversationData.lastMessage = null;
+            }
+            
+            conversationsList.push(conversationData);
+          }
+          
+          // Sort conversations by last message timestamp (most recent first)
+          conversationsList.sort((a, b) => {
+            if (!a.lastMessage) return 1;
+            if (!b.lastMessage) return -1;
+            return b.lastMessage.timestamp - a.lastMessage.timestamp;
+          });
+          
+          setConversations(conversationsList);
+          setUnreadCounts(unreadCountsObj);
+        });
+        
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      }
+    };
+    
+    fetchAdmins();
+    fetchConversations();
+  }, [currentUser]);
+  
+  // Listen for new messages when a conversation is selected
+  useEffect(() => {
+    if (!selectedConversation || !currentUser) return;
+    
+    const conversationRef = doc(db, 'conversations', selectedConversation);
+    const messagesRef = collection(conversationRef, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedMessages = [];
+      snapshot.forEach((doc) => {
+        fetchedMessages.push({ id: doc.id, ...doc.data() });
+      });
+      setMessages(fetchedMessages);
+      
+      // Mark messages as read
+      markConversationAsRead(selectedConversation);
+    });
+    
+    return () => unsubscribe();
+  }, [selectedConversation, currentUser]);
 
   // Toggle dark mode
   const toggleDarkMode = () => {
@@ -388,6 +518,243 @@ const Client = () => {
     return message.substring(0, maxLength) + '...';
   };
 
+  // Message functions
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation || !currentUser) return;
+    
+    try {
+      // Update the conversation's updatedAt timestamp
+      await updateDoc(doc(db, 'conversations', selectedConversation), {
+        updatedAt: serverTimestamp()
+      });
+      
+      // Add the message to the conversation
+      await addDoc(collection(db, 'conversations', selectedConversation, 'messages'), {
+        text: newMessage,
+        senderId: currentUser.uid,
+        timestamp: serverTimestamp(),
+        read: false
+      });
+      
+      // Clear the input field
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    }
+  };
+  
+  const handleSelectConversation = (conversationId) => {
+    setSelectedConversation(conversationId);
+    setMessages([]);
+  };
+  
+  const handleStartNewConversation = async (adminId) => {
+    if (!adminId || !currentUser) return;
+    
+    try {
+      // Check if conversation already exists
+      const existingConversation = conversations.find(conv => 
+        conv.participants.includes(adminId)
+      );
+      
+      if (existingConversation) {
+        setSelectedConversation(existingConversation.id);
+      } else {
+        // Create a new conversation
+        const conversationRef = await addDoc(collection(db, 'conversations'), {
+          participants: [currentUser.uid, adminId],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        
+        setSelectedConversation(conversationRef.id);
+      }
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      alert('Failed to start conversation. Please try again.');
+    }
+  };
+  
+  const markConversationAsRead = async (conversationId) => {
+    if (!conversationId || !currentUser) return;
+    
+    try {
+      const conversationRef = doc(db, 'conversations', conversationId);
+      const messagesRef = collection(conversationRef, 'messages');
+      
+      // Get all unread messages not sent by current user
+      const unreadQuery = query(
+        messagesRef,
+        where('read', '==', false),
+        where('senderId', '!=', currentUser.uid)
+      );
+      
+      const unreadSnapshot = await getDocs(unreadQuery);
+      
+      // Update each message to mark as read
+      const batch = [];
+      unreadSnapshot.forEach((doc) => {
+        batch.push(updateDoc(doc.ref, { read: true }));
+      });
+      
+      await Promise.all(batch);
+      
+      // Update unread counts
+      setUnreadCounts(prev => ({
+        ...prev,
+        [conversationId]: 0
+      }));
+    } catch (error) {
+      console.error('Error marking conversation as read:', error);
+    }
+  };
+  
+  const getTotalUnreadCount = () => {
+    return Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+  };
+  
+  // Render messages tab
+  const renderMessagesTab = () => {
+    return (
+      <div className="messages-container">
+        <h2>Messages</h2>
+        <div className="messaging-interface">
+          <div className="conversations-list">
+            <div className="conversations-header">
+              <h3>Conversations</h3>
+              <div className="new-message-dropdown">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) handleStartNewConversation(e.target.value);
+                    e.target.value = "";
+                  }}
+                  className="recipient-select"
+                >
+                  <option value="">New Message</option>
+                  {admins.map(admin => (
+                    <option key={admin.id} value={admin.id}>
+                      {admin.displayName || admin.username || admin.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="conversation-items">
+              {conversations.length === 0 ? (
+                <div className="empty-state">No conversations yet</div>
+              ) : (
+                conversations.map(conversation => (
+                  <div 
+                    key={conversation.id} 
+                    className={`conversation-item ${selectedConversation === conversation.id ? 'active' : ''}`}
+                    onClick={() => handleSelectConversation(conversation.id)}
+                  >
+                    <div className="conversation-avatar">
+                      <span className={`user-type-indicator ${conversation.otherUser?.accountType || 'user'}`}>
+                        {conversation.otherUser?.name?.charAt(0).toUpperCase() || '?'}
+                      </span>
+                    </div>
+                    <div className="conversation-details">
+                      <div className="conversation-header">
+                        <h4>{conversation.otherUser?.name || 'Unknown User'}</h4>
+                        {unreadCounts[conversation.id] > 0 && (
+                          <span className="unread-badge">{unreadCounts[conversation.id]}</span>
+                        )}
+                      </div>
+                      {conversation.lastMessage && (
+                        <div className="conversation-preview">
+                          <p>
+                            {conversation.lastMessage.senderId === currentUser.uid ? 'You: ' : ''}
+                            {conversation.lastMessage.text.length > 30 
+                              ? conversation.lastMessage.text.substring(0, 30) + '...' 
+                              : conversation.lastMessage.text}
+                          </p>
+                          <span className="message-time">
+                            {conversation.lastMessage.timestamp.toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          <div className="message-content">
+            {selectedConversation ? (
+              <>
+                <div className="message-header">
+                  <h3>
+                    {conversations.find(c => c.id === selectedConversation)?.otherUser?.name || 'Unknown User'}
+                  </h3>
+                  <span className="user-type">
+                    ({conversations.find(c => c.id === selectedConversation)?.otherUser?.accountType || 'user'})
+                  </span>
+                </div>
+                
+                <div className="messages-list">
+                  {messages.length === 0 ? (
+                    <div className="empty-state">No messages yet</div>
+                  ) : (
+                    messages.map(message => (
+                      <div 
+                        key={message.id} 
+                        className={`message-bubble ${message.senderId === currentUser.uid ? 'sent' : 'received'}`}
+                      >
+                        <div className="message-text">{message.text}</div>
+                        <div className="message-meta">
+                          {message.timestamp ? (
+                            <span className="message-time">
+                              {message.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          ) : (
+                            <span className="message-time">Sending...</span>
+                          )}
+                          {message.senderId === currentUser.uid && (
+                            <span className="message-status">
+                              {message.read ? '✓✓' : '✓'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="message-input">
+                  <input 
+                    type="text" 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <button 
+                    className="send-button"
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="no-conversation-selected">
+                <div className="empty-state">
+                  <p>Select a conversation or start a new message</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={`erp-container fullscreen-page ${darkMode ? 'dark-theme' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Sidebar */}
@@ -397,11 +764,22 @@ const Client = () => {
         </div>
         <nav>
           <ul>
-            <li className="active">
+            <li className={activeTab === 'projects' ? 'active' : ''} onClick={() => setActiveTab('projects')}>
               <span className="icon">📁</span> {!sidebarCollapsed && <span>Projects</span>}
             </li>
-            <li>
-              <span className="icon">💬</span> {!sidebarCollapsed && <span>Messages</span>}
+            <li className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>
+              <span className="icon">💬</span> 
+              {!sidebarCollapsed && (
+                <span>
+                  Messages
+                  {getTotalUnreadCount() > 0 && (
+                    <span className="unread-badge sidebar-badge">{getTotalUnreadCount()}</span>
+                  )}
+                </span>
+              )}
+              {sidebarCollapsed && getTotalUnreadCount() > 0 && (
+                <span className="unread-badge sidebar-badge-collapsed">{getTotalUnreadCount()}</span>
+              )}
             </li>
             <li onClick={handleLogout}>
               <span className="icon">🚪</span> {!sidebarCollapsed && <span>Logout</span>}
@@ -414,10 +792,10 @@ const Client = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="main-content client-main-content">
+      <main className="main-content">
         {/* Header */}
         <header className="header">
-          <div className="admin-title">
+          <div className="client-title">
             <h1>Client Dashboard</h1>
           </div>
           <div className="user-menu">
@@ -425,188 +803,201 @@ const Client = () => {
               {darkMode ? '☀️' : '🌙'}
             </button>
             <div className="user-profile">
-              <span className="avatar">{userProfile?.displayName?.[0] || userProfile?.username?.[0] || 'C'}</span>
-              <span className="user-name">{userProfile?.displayName || userProfile?.username || 'Client'}</span>
+              <span className="avatar">
+                {userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0) || 'C'}
+              </span>
+              <span className="user-name">
+                {userProfile?.displayName || userProfile?.email?.split('@')[0] || 'Client'}
+              </span>
             </div>
           </div>
         </header>
 
-        <div className="client-dashboard">
+        {/* Content */}
+        <div className="client-content">
+          {activeTab === 'projects' ? (
+            <>
+              <div className="client-dashboard">
 
-          <div className="dashboard-stats">
-            <div className="stat-card">
-              <h3>Active Projects</h3>
-              <p className="stat-value">{getActiveProjectsCount()}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Completed Projects</h3>
-              <p className="stat-value">{getCompletedProjectsCount()}</p>
-            </div>
-            <div className="stat-card">
-              <h3>On Hold</h3>
-              <p className="stat-value">{getOnHoldProjectsCount()}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Total Projects</h3>
-              <p className="stat-value">{projects.length}</p>
-            </div>
-          </div>
+                <div className="dashboard-stats">
+                  <div className="stat-card">
+                    <h3>Active Projects</h3>
+                    <p className="stat-value">{getActiveProjectsCount()}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>Completed Projects</h3>
+                    <p className="stat-value">{getCompletedProjectsCount()}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>On Hold</h3>
+                    <p className="stat-value">{getOnHoldProjectsCount()}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>Total Projects</h3>
+                    <p className="stat-value">{projects.length}</p>
+                  </div>
+                </div>
 
-          <div className="projects-section">
-            <h2>Your Projects</h2>
-            {isLoading ? (
-              <div className="loading">Loading projects...</div>
-            ) : projects.length === 0 ? (
-              <div className="empty-state">
-                <p>You don't have any projects yet.</p>
-              </div>
-            ) : (
-              <div className="projects-list">
-                {projects.map(project => {
-                  const projectDetail = projectDetails[project.id] || project;
-                  const isExpanded = expandedProjects[project.id] || false;
-                  const tasks = projectDetail.tasks || [];
-                  
-                  return (
-                    <div key={project.id} className="admin-project-card">
-                      <div className="project-header">
-                        <div className="project-main-info">
-                          <h3>{project.name || project.title}</h3>
-                          <span 
-                            className="status-badge" 
-                            style={{ backgroundColor: getStatusColor(project.status) }}
-                          >
-                            {project.status === 'todo' ? 'To Do' :
-                             project.status === 'inProgress' ? 'In Progress' :
-                             project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                          </span>
-                          {project.liveLink && (
-                            <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="live-link">
-                              🔗 Live Link
-                            </a>
-                          )}
-                          <button 
-                            className="details-button"
-                            onClick={() => toggleProjectExpansion(project.id)}
-                          >
-                            {isExpanded ? 'Hide Details' : 'Show Details'}
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {isExpanded && (
-                        <div className="project-details">
-                          <div className="project-info">
-                            <h4>Project Details</h4>
-                            <p><strong>Description:</strong> {project.description || 'No description provided'}</p>
-                            <p><strong>Start Date:</strong> {formatDate(project.startDate)}</p>
-                            <p><strong>Due Date:</strong> {formatDate(project.dueDate)}</p>
-                            <p><strong>Created:</strong> {formatDate(project.createdAt)}</p>
-                            <p><strong>Type:</strong> {project.projectType || 'Not specified'}</p>
-                          </div>
-                          
-                          <div className="project-users">
-                            <div className="assigned-users">
-                              <h4>Assigned Team</h4>
-                              {projectDetail.assignedUsers?.length > 0 ? (
-                                <div className="user-chips">
-                                  {projectDetail.assignedUsers.map(user => (
-                                    <span key={user.id} className="user-chip">
-                                      {user.displayName || user.email || 'Unknown'}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p>No team members assigned</p>
-                              )}
+                <div className="projects-section">
+                  <h2>Your Projects</h2>
+                  {isLoading ? (
+                    <div className="loading">Loading projects...</div>
+                  ) : projects.length === 0 ? (
+                    <div className="empty-state">
+                      <p>You don't have any projects yet.</p>
+                    </div>
+                  ) : (
+                    <div className="projects-list">
+                      {projects.map(project => {
+                        const projectDetail = projectDetails[project.id] || project;
+                        const isExpanded = expandedProjects[project.id] || false;
+                        const tasks = projectDetail.tasks || [];
+                        
+                        return (
+                          <div key={project.id} className="admin-project-card">
+                            <div className="project-header">
+                              <div className="project-main-info">
+                                <h3>{project.name || project.title}</h3>
+                                <span 
+                                  className="status-badge" 
+                                  style={{ backgroundColor: getStatusColor(project.status) }}
+                                >
+                                  {project.status === 'todo' ? 'To Do' :
+                                   project.status === 'inProgress' ? 'In Progress' :
+                                   project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                                </span>
+                                {project.liveLink && (
+                                  <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="live-link">
+                                    🔗 Live Link
+                                  </a>
+                                )}
+                                <button 
+                                  className="details-button"
+                                  onClick={() => toggleProjectExpansion(project.id)}
+                                >
+                                  {isExpanded ? 'Hide Details' : 'Show Details'}
+                                </button>
+                              </div>
                             </div>
                             
-                            <div className="project-managers">
-                              <h4>Project Managers</h4>
-                              {projectDetail.managerUsers?.length > 0 ? (
-                                <div className="user-chips">
-                                  {projectDetail.managerUsers.map(manager => (
-                                    <span key={manager.id} className="manager-chip">
-                                      {manager.displayName || manager.email || 'Unknown'}
-                                    </span>
-                                  ))}
+                            {isExpanded && (
+                              <div className="project-details">
+                                <div className="project-info">
+                                  <h4>Project Details</h4>
+                                  <p><strong>Description:</strong> {project.description || 'No description provided'}</p>
+                                  <p><strong>Start Date:</strong> {formatDate(project.startDate)}</p>
+                                  <p><strong>Due Date:</strong> {formatDate(project.dueDate)}</p>
+                                  <p><strong>Created:</strong> {formatDate(project.createdAt)}</p>
+                                  <p><strong>Type:</strong> {project.projectType || 'Not specified'}</p>
                                 </div>
+                                
+                                <div className="project-users">
+                                  <div className="assigned-users">
+                                    <h4>Assigned Team</h4>
+                                    {projectDetail.assignedUsers?.length > 0 ? (
+                                      <div className="user-chips">
+                                        {projectDetail.assignedUsers.map(user => (
+                                          <span key={user.id} className="user-chip">
+                                            {user.displayName || user.email || 'Unknown'}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p>No team members assigned</p>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="project-managers">
+                                    <h4>Project Managers</h4>
+                                    {projectDetail.managerUsers?.length > 0 ? (
+                                      <div className="user-chips">
+                                        {projectDetail.managerUsers.map(manager => (
+                                          <span key={manager.id} className="manager-chip">
+                                            {manager.displayName || manager.email || 'Unknown'}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p>No managers assigned</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="project-tasks">
+                              <h4>Tasks</h4>
+                              {tasks.length > 0 ? (
+                                <ul className="tasks-list">
+                                  {tasks.map(task => (
+                                    <li 
+                                      key={task.id} 
+                                      className={`task-item ${task.completed ? 'completed' : ''}`}
+                                    >
+                                      <div className="task-content">
+                                        <span className="task-status-icon">
+                                          {task.completed ? '✅' : '⬜'}
+                                        </span>
+                                        <span className="task-title">{task.title}</span>
+                                      </div>
+                                      <div className="task-meta">
+                                        Due: {formatDate(task.dueDate)}
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
                               ) : (
-                                <p>No managers assigned</p>
+                                <p>No tasks for this project</p>
                               )}
                             </div>
                           </div>
-                        </div>
-                      )}
-                      
-                      <div className="project-tasks">
-                        <h4>Tasks</h4>
-                        {tasks.length > 0 ? (
-                          <ul className="tasks-list">
-                            {tasks.map(task => (
-                              <li 
-                                key={task.id} 
-                                className={`task-item ${task.completed ? 'completed' : ''}`}
-                              >
-                                <div className="task-content">
-                                  <span className="task-status-icon">
-                                    {task.completed ? '✅' : '⬜'}
-                                  </span>
-                                  <span className="task-title">{task.title}</span>
-                                </div>
-                                <div className="task-meta">
-                                  Due: {formatDate(task.dueDate)}
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p>No tasks for this project</p>
-                        )}
-                      </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
 
-          <div className="recent-activity">
-            <h2>Repository Activity</h2>
-            <div className="activity-timeline">
-              {repoLoading ? (
-                <div className="loading">Loading commit history...</div>
-              ) : repoError ? (
-                <div className="error-message">{repoError}</div>
-              ) : commits.length > 0 ? (
-                <div className="timeline-items">
-                  {commits.map((commit, index) => (
-                    <div 
-                      className="timeline-item" 
-                      key={commit.id}
-                      style={{"--index": index}}
-                    >
-                      <div className="timeline-marker"></div>
-                      <div className="timeline-content">
-                        <h4>
-                          <a href={commit.commitUrl} target="_blank" rel="noopener noreferrer" className="commit-link">
-                            {truncateMessage(commit.message, 70)}
-                          </a>
-                        </h4>
-                        <p>Repository: {commit.projectName}</p>
-                        <p>Author: {commit.author}</p>
-                        <small>{formatCommitDate(commit.date)}</small>
+                <div className="recent-activity">
+                  <h2>Repository Activity</h2>
+                  <div className="activity-timeline">
+                    {repoLoading ? (
+                      <div className="loading">Loading commit history...</div>
+                    ) : repoError ? (
+                      <div className="error-message">{repoError}</div>
+                    ) : commits.length > 0 ? (
+                      <div className="timeline-items">
+                        {commits.map((commit, index) => (
+                          <div 
+                            className="timeline-item" 
+                            key={commit.id}
+                            style={{"--index": index}}
+                          >
+                            <div className="timeline-marker"></div>
+                            <div className="timeline-content">
+                              <h4>
+                                <a href={commit.commitUrl} target="_blank" rel="noopener noreferrer" className="commit-link">
+                                  {truncateMessage(commit.message, 70)}
+                                </a>
+                              </h4>
+                              <p>Repository: {commit.projectName}</p>
+                              <p>Author: {commit.author}</p>
+                              <small>{formatCommitDate(commit.date)}</small>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
+                    ) : (
+                      <div className="empty-state">
+                        <p>No repository commits found. Make sure your projects have linked repositories.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div className="empty-state">
-                  <p>No repository commits found. Make sure your projects have linked repositories.</p>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          ) : (
+            renderMessagesTab()
+          )}
         </div>
       </main>
     </div>
