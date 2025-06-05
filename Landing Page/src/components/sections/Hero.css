@@ -1,0 +1,159 @@
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 5rem;
+  overflow: hidden;
+}
+
+.hero .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-content {
+  width: 50%;
+  z-index: 2;
+}
+
+.hero h1 {
+  margin-bottom: 1rem;
+}
+
+.hero .highlight {
+  color: var(--secondary);
+  position: relative;
+  display: inline-block;
+}
+
+.hero .highlight::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 10px;
+  bottom: 5px;
+  left: 0;
+  background-color: rgba(255, 77, 90, 0.2);
+  z-index: -1;
+}
+
+.animated-text {
+  display: flex;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary);
+  margin-bottom: 2rem;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.hero-image {
+  width: 40%;
+  height: 500px;
+  position: relative;
+}
+
+.blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%;
+  opacity: 0.8;
+  filter: blur(20px);
+}
+
+.floating-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  background-image: url('https://images.unsplash.com/photo-1535223289827-42f1e9919769?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80');
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.scroll-dot {
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+@media (max-width: 992px) {
+  .hero .container {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .hero-content {
+    width: 100%;
+    margin-bottom: 4rem;
+  }
+  
+  .animated-text {
+    justify-content: center;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+  }
+  
+  .hero-image {
+    width: 80%;
+    height: 400px;
+  }
+  
+  .blob {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .floating-image {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-image {
+    height: 300px;
+  }
+  
+  .blob {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .floating-image {
+    width: 200px;
+    height: 200px;
+  }
+} 
