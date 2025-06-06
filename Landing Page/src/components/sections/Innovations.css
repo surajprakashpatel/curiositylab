@@ -1,0 +1,211 @@
+.innovations {
+  background-color: var(--dark);
+  padding: 8rem 0;
+  overflow: hidden;
+}
+
+.innovations-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section-header h2 {
+  margin-bottom: 1.5rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.section-header p {
+  font-size: 1.2rem;
+  color: var(--gray);
+  line-height: 1.6;
+}
+
+.innovation-projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2.5rem;
+}
+
+.innovation-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.innovation-image {
+  height: 220px;
+  overflow: hidden;
+}
+
+.innovation-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.innovation-card:hover .innovation-image img {
+  transform: scale(1.05);
+}
+
+.innovation-details {
+  padding: 1.8rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.innovation-details h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: var(--light);
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+.innovation-details h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+}
+
+.innovation-details p {
+  color: var(--gray);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.innovation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  background-color: rgba(103, 232, 249, 0.1);
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.innovation-vision {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.vision-content {
+  padding: 2rem;
+}
+
+.vision-content h3 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--light);
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.vision-content h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+}
+
+.vision-content p {
+  font-size: 1.1rem;
+  color: var(--gray);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+.vision-image {
+  position: relative;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-shape {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  opacity: 0.7;
+  filter: blur(15px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .innovation-vision {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .vision-image {
+    height: 300px;
+  }
+  
+  .floating-shape {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .innovations {
+    padding: 5rem 0;
+  }
+  
+  .innovations-content {
+    gap: 3rem;
+  }
+  
+  .innovation-projects {
+    grid-template-columns: 1fr;
+  }
+  
+  .innovation-image {
+    height: 180px;
+  }
+  
+  .vision-content {
+    padding: 1rem 0;
+  }
+  
+  .vision-content h3 {
+    font-size: 1.8rem;
+  }
+} 

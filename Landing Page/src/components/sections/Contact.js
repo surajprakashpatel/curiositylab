@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import './Contact.css';
+import GradientText from '../../Effects/GradientText';
 
 const Contact = ({ textEnter, buttonEnter, defaultCursor }) => {
   const ref = useRef(null);
@@ -142,15 +143,22 @@ const Contact = ({ textEnter, buttonEnter, defaultCursor }) => {
   return (
     <section id="contact" className="contact" ref={ref}>
       <div className="container">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           onMouseEnter={textEnter}
           onMouseLeave={defaultCursor}
         >
-          Get In Touch
-        </motion.h2>
+          <GradientText
+            colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+            animationSpeed={6}
+            showBorder={false}
+            className="section-heading"
+          >
+            Get In Touch
+          </GradientText>
+        </motion.div>
         
         <div className="contact-content">
           <motion.div 
@@ -159,12 +167,19 @@ const Contact = ({ textEnter, buttonEnter, defaultCursor }) => {
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
           >
-            <motion.h3
+            <motion.div
               onMouseEnter={textEnter}
               onMouseLeave={defaultCursor}
             >
-              Let's Talk
-            </motion.h3>
+              <GradientText
+                colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+                animationSpeed={6}
+                showBorder={false}
+                className="sub-heading"
+              >
+                Let's Talk
+              </GradientText>
+            </motion.div>
             
             <motion.p
               onMouseEnter={textEnter}

@@ -20,6 +20,27 @@
 
 .hero h1 {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+
+.hero-highlight {
+  display: inline-block !important;
+  white-space: nowrap;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+}
+
+.hero-highlight .text-content {
+  font-size: inherit;
+  font-weight: inherit;
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: nowrap;
 }
 
 .hero .highlight {

@@ -1,0 +1,106 @@
+/* Section heading styles - with higher specificity */
+.section-heading .text-content,
+section .section-heading .text-content,
+.container .section-heading .text-content {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+.sub-heading .text-content,
+section .sub-heading .text-content,
+.container .sub-heading .text-content {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+.card-heading .text-content,
+.innovation-card .card-heading .text-content {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+.project-title .text-content,
+.project-info .project-title .text-content {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+.service-title .text-content,
+.service-card .service-title .text-content {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+.hero-highlight .text-content,
+.hero .hero-highlight .text-content {
+  font-size: 3.5rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  text-transform: none !important;
+}
+
+/* Override for all animated gradient text */
+.animated-gradient-text {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Ensure proper spacing */
+.section-heading,
+section .section-heading,
+.container .section-heading {
+  margin-bottom: 2rem !important;
+  display: block !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+.sub-heading,
+section .sub-heading,
+.container .sub-heading {
+  margin-bottom: 1.5rem !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-heading .text-content,
+  section .section-heading .text-content,
+  .container .section-heading .text-content {
+    font-size: 2rem !important;
+  }
+  
+  .sub-heading .text-content,
+  section .sub-heading .text-content,
+  .container .sub-heading .text-content {
+    font-size: 1.5rem !important;
+  }
+  
+  .hero-highlight .text-content,
+  .hero .hero-highlight .text-content {
+    font-size: 2.5rem !important;
+  }
+} 

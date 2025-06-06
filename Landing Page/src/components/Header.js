@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import './Header.css';
+import GradientText from '../Effects/GradientText';
 
 const Header = ({ textEnter, buttonEnter, defaultCursor }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -68,6 +69,9 @@ const Header = ({ textEnter, buttonEnter, defaultCursor }) => {
       } 
     }
   };
+
+  // Updated navigation items for a tech innovation company
+  const navItems = ['Home', 'About', 'Innovations', 'Technologies', 'Solutions', 'Consultancy', 'Contact'];
   
   return (
     <motion.header
@@ -83,12 +87,19 @@ const Header = ({ textEnter, buttonEnter, defaultCursor }) => {
           onMouseEnter={textEnter}
           onMouseLeave={defaultCursor}
         >
-          Curiosity Lab
+  
+  <GradientText
+    colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+    animationSpeed={6}
+    showBorder={false}
+    className="header-logo-text"
+  >Curiosity Lab
+  </GradientText>
         </motion.div>
         
         <nav className="desktop-nav">
           <ul>
-            {['Home', 'About', 'Projects', 'Skills', 'Contact'].map((item, i) => (
+            {navItems.map((item, i) => (
               <motion.li 
                 key={item}
                 custom={i}
@@ -132,7 +143,7 @@ const Header = ({ textEnter, buttonEnter, defaultCursor }) => {
         animate={menuOpen ? "open" : "closed"}
       >
         <ul>
-          {['Home', 'About', 'Projects', 'Skills', 'Contact'].map((item) => (
+          {navItems.map((item) => (
             <motion.li 
               key={item}
               variants={mobileNavItemVariants}

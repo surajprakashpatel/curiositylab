@@ -1,23 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
+import './components/sections/SectionHeadings.css';
 
 // Import sections
 import Header from './components/Header';
 import Hero from './components/sections/Hero';
 import About from './components/sections/About';
+import Innovations from './components/sections/Innovations';
 import Projects from './components/sections/Projects';
-import Skills from './components/sections/Skills';
+import Consultancy from './components/sections/Consultancy';
 import Contact from './components/sections/Contact';
 import Cursor from './components/Cursor';
 
 function App() {
   const [cursorVariant, setCursorVariant] = useState("default");
 
-  // Cursor handlers
+  // Custom cursor handlers
   const textEnter = () => setCursorVariant("text");
   const buttonEnter = () => setCursorVariant("button");
   const defaultCursor = () => setCursorVariant("default");
+  
+  // Preload images
+  useEffect(() => {
+    const preloadImages = () => {
+      // Add any images you want to preload here
+    };
+    
+    preloadImages();
+  }, []);
 
   return (
     <div className="App">
@@ -48,13 +59,19 @@ function App() {
               defaultCursor={defaultCursor} 
             />
             
+            <Innovations 
+              textEnter={textEnter} 
+              buttonEnter={buttonEnter} 
+              defaultCursor={defaultCursor} 
+            />
+            
             <Projects 
               textEnter={textEnter} 
               buttonEnter={buttonEnter} 
               defaultCursor={defaultCursor} 
             />
             
-            <Skills 
+            <Consultancy 
               textEnter={textEnter} 
               buttonEnter={buttonEnter} 
               defaultCursor={defaultCursor} 

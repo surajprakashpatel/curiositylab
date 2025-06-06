@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './Hero.css';
+import GradientText from "../../Effects/GradientText";
+
 
 const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
   // Animation variants
@@ -53,7 +55,7 @@ const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
   };
   
   // Split text animation
-  const sentence = "Creative Developer & Designer";
+  const sentence = "Innovating for a Better Tomorrow";
   const sentenceVariants = {
     hidden: { opacity: 1 },
     visible: {
@@ -87,7 +89,14 @@ const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
             onMouseEnter={textEnter}
             onMouseLeave={defaultCursor}
           >
-            We Are <span className="highlight">Curiosity Lab</span>
+             <GradientText 
+              colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+              animationSpeed={6}
+              showBorder={false}
+              className="hero-highlight"
+            >
+              Curiosity Lab
+            </GradientText>
           </motion.h1>
           
           <motion.div
@@ -113,7 +122,7 @@ const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
             onMouseEnter={textEnter}
             onMouseLeave={defaultCursor}
           >
-            We will help you elevate your brand with our creative and innovative tech solutions.
+            We're a cutting-edge technology company dedicated to creating innovative solutions that transform industries and improve lives. Our passion for technology drives us to push boundaries and redefine what's possible.
           </motion.p>
           
           <div className="hero-buttons">
@@ -125,7 +134,7 @@ const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
               onMouseEnter={buttonEnter}
               onMouseLeave={defaultCursor}
             >
-              View Our Work
+              Discover Our Tech
             </motion.button>
             
             <motion.button 
@@ -136,7 +145,7 @@ const Hero = ({ textEnter, buttonEnter, defaultCursor }) => {
               onMouseEnter={buttonEnter}
               onMouseLeave={defaultCursor}
             >
-              Contact Us
+              Join Our Mission
             </motion.button>
           </div>
         </motion.div>

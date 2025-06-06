@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import './Projects.css';
+import GradientText from '../../Effects/GradientText';
 
 const Projects = ({ textEnter, buttonEnter, defaultCursor }) => {
   const ref = useRef(null);
@@ -66,15 +67,22 @@ const Projects = ({ textEnter, buttonEnter, defaultCursor }) => {
   return (
     <section id="projects" className="projects">
       <div className="container">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           onMouseEnter={textEnter}
           onMouseLeave={defaultCursor}
         >
-          My Projects
-        </motion.h2>
+          <GradientText
+            colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+            animationSpeed={6}
+            showBorder={false}
+            className="section-heading"
+          >
+            Our Projects
+          </GradientText>
+        </motion.div>
         
         <motion.div 
           className="projects-grid"
@@ -123,7 +131,14 @@ const Projects = ({ textEnter, buttonEnter, defaultCursor }) => {
               </div>
               <div className="project-info">
                 <span className="project-category">{project.category}</span>
-                <h3 className="project-title">{project.title}</h3>
+                <GradientText
+                  colors={["#67e8f9", "#4079ff", "#67e8f9", "#4079ff", "#67e8f9"]}
+                  animationSpeed={6}
+                  showBorder={false}
+                  className="project-title"
+                >
+                  {project.title}
+                </GradientText>
                 <p className="project-description">{project.description}</p>
               </div>
             </motion.div>
