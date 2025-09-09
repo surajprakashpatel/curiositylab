@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/PrivacyPolicy.css'; // We will create this CSS file next
+import '../styles/KartavyaPrivacy.css'; 
 
 const PrivacyPolicy = () => {
   return (
