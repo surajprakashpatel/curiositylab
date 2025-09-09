@@ -1,0 +1,83 @@
+/* General container for the privacy policy */
+.privacy-policy-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+    padding: 20px 40px;
+    max-width: 800px;
+    margin: 40px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    line-height: 1.6;
+}
+
+/* Main heading */
+.privacy-policy-container h1 {
+    color: #1a237e; /* Dark blue */
+    font-size: 2.5em;
+    border-bottom: 2px solid #3f51b5; /* Primary blue */
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Section headings */
+.privacy-policy-container h2 {
+    color: #3f51b5; /* Primary blue */
+    font-size: 1.8em;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+/* Sub-headings */
+.privacy-policy-container h3 {
+    color: #555;
+    font-size: 1.4em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* A block of content */
+.policy-section {
+    margin-bottom: 25px;
+}
+
+/* Standard paragraphs */
+.privacy-policy-container p {
+    color: #555;
+    font-size: 1em;
+    margin-bottom: 15px;
+}
+
+/* Unordered lists */
+.privacy-policy-container ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+/* Nested lists */
+.privacy-policy-container ul ul {
+    list-style-type: circle;
+    margin-top: 10px;
+}
+
+/* List items */
+.privacy-policy-container li {
+    margin-bottom: 10px;
+}
+
+/* Hyperlinks */
+.privacy-policy-container a {
+    color: #303f9f; /* A darker blue for links */
+    text-decoration: none;
+    border-bottom: 1px dotted #303f9f;
+}
+
+.privacy-policy-container a:hover {
+    color: #1a237e;
+    border-bottom: 1px solid #1a237e;
+}
+
+/* Strong/bold text */
+.privacy-policy-container strong {
+    color: #333;
+}

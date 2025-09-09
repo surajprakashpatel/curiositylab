@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Projects from './pages/Tasks';
 import Admin from './pages/Admin';
 import Client from './pages/Client';
+import PrivacyPolicy from './pages/KartavyaPrivacy';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Main />} />
+            <Route path="/privacy-policy-kartavya" element={<PrivacyPolicy/>}/>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Projects />} />
