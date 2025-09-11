@@ -7,10 +7,17 @@
   padding: 0;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  color: #333;
+/* Keep the login page body styles */
+body.login-page {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 100vh;
   background-color: #f5f5f5;
+}
+
+/* Remove the global body flex styles or make them conditional */
+body:not(.home-page):not(.login-page) {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,18 +78,50 @@ body {
   text-decoration: underline;
 }
 
-/* Left Panel (Branding side) */
+/* Enhanced Left Panel with Decorative Effects */
 .left-panel {
   flex: 1;
-  background-color: #3F51B5;
+  /* Enhanced gradient background instead of solid black */
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.left-content {
+/* Add animated geometric shapes */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 50%);
+  animation: rotateBackground 25s linear infinite;
+  z-index: 1;
+}
+
+.left-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  z-index: 1;
+}
+
+/* Content positioning */
+.left-panel-content {
+  position: relative;
+  z-index: 2;
   max-width: 500px;
   margin: 0 auto;
 }
@@ -92,13 +131,92 @@ body {
   font-weight: 700;
   margin-bottom: 1.5rem;
   line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .left-panel p {
   font-size: 1rem;
   line-height: 1.5;
   margin-bottom: 1.5rem;
+  opacity: 0.9;
 }
+
+/* Add floating geometric decorations */
+.geometric-decoration {
+  position: absolute;
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 1;
+}
+
+.shape-circle-1 {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  top: 10%;
+  right: -100px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.shape-square-1 {
+  width: 150px;
+  height: 150px;
+  bottom: 10%;
+  left: -75px;
+  transform: rotate(45deg);
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.shape-circle-2 {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  top: 50%;
+  right: 20px;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.shape-square-2 {
+  width: 80px;
+  height: 80px;
+  top: 30%;
+  left: 10px;
+  transform: rotate(15deg);
+  animation: float 7s ease-in-out infinite;
+}
+
+/* Alternative: Dots pattern effect (comment out shapes above and uncomment below) */
+/*
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: driftPattern 20s ease-in-out infinite alternate;
+  z-index: 1;
+}
+*/
+
+/* Alternative: Grid lines effect (comment out other effects and uncomment below) */
+/*
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 25s linear infinite;
+  z-index: 1;
+}
+*/
 
 .highlight {
   font-weight: 600;
@@ -194,6 +312,9 @@ body {
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .forgot-password:hover {
@@ -203,7 +324,7 @@ body {
 .login-btn {
   width: 100%;
   padding: 0.9rem;
-  background-color: #3F51B5;
+  background-color: #000;
   color: white;
   border: none;
   border-radius: 8px;
@@ -215,7 +336,12 @@ body {
 }
 
 .login-btn:hover {
-  background-color: #303F9F;
+  background-color: #000;
+}
+
+.login-btn:disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
 }
 
 .divider {
@@ -258,10 +384,67 @@ body {
   background-color: #f5f5f5;
 }
 
+.google-signin-btn:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
 .google-icon {
   width: 18px;
   height: 18px;
   margin-right: 0.5rem;
+}
+
+/* Alert styles */
+.alert {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.alert-error {
+  background-color: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+}
+
+.alert-success {
+  background-color: #efe;
+  color: #363;
+  border: 1px solid #cfc;
+}
+
+/* Animations */
+@keyframes rotateBackground {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.1); 
+  }
+}
+
+@keyframes driftPattern {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(20px) translateY(10px); }
+}
+
+@keyframes gridMove {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(50px) translateY(50px); }
 }
 
 /* Responsive adjustments */
@@ -288,5 +471,10 @@ body {
   
   .left-panel h1 {
     font-size: 2.5rem;
+  }
+  
+  /* Hide floating shapes on mobile for performance */
+  .geometric-decoration {
+    display: none;
   }
 }

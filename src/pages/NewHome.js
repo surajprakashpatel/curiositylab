@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import Footer from "../components/Footer";
 import '../styles/NewHome.css';
@@ -18,10 +18,17 @@ import phone from "../assets/icons/phone.png"
 import location from "../assets/icons/location.png";
 import logo from "../assets/icons/logo.png";
 import CountUp from '../components/Countup';
+import Header from '../components/Header'
 
 
 
 const Home = () => {
+    useEffect(() => {
+    document.body.classList.add('home-page');
+    return () => {
+    document.body.classList.remove('home-page');
+      };
+    }, []);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -49,37 +56,7 @@ const Home = () => {
   return (<><section>
     <div className="hero-container">
       {/* Navigation */}
-      <nav className="navbar">
-        <div className="nav-content">
-          <div className="logo">
-            Curiosity Lab
-          </div>
-          <div className="nav-links">
-            <div className="nav-item dropdown">
-              Projects
-              <span className="dropdown-arrow">▼</span>
-            </div>
-            <div className="nav-item dropdown">
-              Services
-              <span className="dropdown-arrow">▼</span>
-            </div>
-            <div className="nav-item dropdown">
-              Resources
-              <span className="dropdown-arrow">▼</span>
-            </div>
-            <Link to="about" smooth={true} duration={500}>
-            <div className="nav-item">About Us</div>
-            </Link>
-            <Link to="goal" smooth={true} duration={500}>
-            <div className="nav-item">Our Goal</div>
-          </Link>
-          </div>
-          <div className="nav-actions">
-            <Link to="contact" smooth={true} duration={500}><button className="sign-in-btn">Contact us</button></Link>
-            <button className="contact-sales-btn" onClick={() => navigate("/login")}>Sign in</button>
-          </div>
-        </div>
-      </nav>
+      <Header/>
 
       {/* Hero Content */}
       <div className="hero-content">
