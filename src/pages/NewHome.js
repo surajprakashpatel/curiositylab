@@ -16,6 +16,10 @@ import community from "../assets/icons/community.png";
 import email from "../assets/icons/email.png";
 import phone from "../assets/icons/phone.png"
 import location from "../assets/icons/location.png";
+import logo from "../assets/icons/logo.png";
+import CountUp from '../components/Countup';
+
+
 
 const Home = () => {
     const navigate = useNavigate();
@@ -288,15 +292,36 @@ const Home = () => {
             </p>
             <div className="mission-stats">
               <div className="stat-item">
-                <div className="stat-number">10,000+</div>
+                <div className="stat-number"><CountUp
+                from={0}
+                to={10000}
+                separator=","
+                direction="up"
+                duration={1}
+                className="count-up-text"
+                />+</div>
                 <div className="stat-label">Lives Impacted</div>
               </div>
               <div className="stat-item">
-                <div className="stat-number">5+</div>
+                <div className="stat-number"><CountUp
+                from={0}
+                to={5}
+                separator=","
+                direction="up"
+                duration={1}
+                className="count-up-text"
+                />+</div>
                 <div className="stat-label">Countries Reached</div>
               </div>
               <div className="stat-item">
-                <div className="stat-number">3 Years+</div>
+                <div className="stat-number"><CountUp
+                from={0}
+                to={3}
+                separator=","
+                direction="up"
+                duration={1}
+                className="count-up-text"
+                />+</div>
                 <div className="stat-label">Of Excellence</div>
               </div>
             </div>
@@ -477,7 +502,7 @@ const Home = () => {
               </div>
 
               <div className="social-links">
-                <h4 className="social-title">Follow our journey</h4>
+                <h4 className="social-title">Follow our Journey</h4>
                 <div className="social-icons">
                   <div className="social-icon"><img src={insta} /></div>
                   <div className="social-icon"><img src={youtube} /></div>
