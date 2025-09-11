@@ -1,7 +1,11 @@
 import React,{useState} from 'react';
+import {useNavigate} from "react-router-dom";
+import Footer from "../components/Footer"
 import '../styles/NewHome.css';
+import {Link , ELement} from "react-scroll" ;
 
-const HeroSection = () => {
+const Home = () => {
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
     name: '',
@@ -31,27 +35,31 @@ const HeroSection = () => {
       <nav className="navbar">
         <div className="nav-content">
           <div className="logo">
-            argyle
+            Curiosity Lab
           </div>
           <div className="nav-links">
             <div className="nav-item dropdown">
-              Industries
+              Projects
               <span className="dropdown-arrow">▼</span>
             </div>
             <div className="nav-item dropdown">
-              Solutions
+              Services
               <span className="dropdown-arrow">▼</span>
             </div>
             <div className="nav-item dropdown">
               Resources
               <span className="dropdown-arrow">▼</span>
             </div>
-            <div className="nav-item">Docs</div>
-            <div className="nav-item">API</div>
+            <Link to="about" smooth={true} duration={500}>
+            <div className="nav-item">About Us</div>
+            </Link>
+            <Link to="goal" smooth={true} duration={500}>
+            <div className="nav-item">Our Goal</div>
+          </Link>
           </div>
           <div className="nav-actions">
-            <button className="sign-in-btn">Sign in</button>
-            <button className="contact-sales-btn">Contact sales</button>
+            <Link to="contact" smooth={true} duration={500}><button className="sign-in-btn">Contact us</button></Link>
+            <button className="contact-sales-btn" onClick={() => navigate("/login")}>Sign in</button>
           </div>
         </div>
       </nav>
@@ -117,6 +125,7 @@ const HeroSection = () => {
         <div className="about-container">
       <div className="about-content">
         {/* Header Section */}
+        <element name="about">
         <div className="about-header">
           <p className="section-label">OUR MISSION</p>
           <h1 className="about-title">About Us</h1>
@@ -168,6 +177,7 @@ const HeroSection = () => {
             </p>
           </div>
         </div>
+        </element>
 
         {/* Call to Action */}
         <div className="about-cta">
@@ -183,6 +193,7 @@ const HeroSection = () => {
       <div className="bg-decoration-bottom"></div>
     </div>
     </section>
+    <element name="goal">
     <section>
         <div className="goal-container">
       <div className="goal-content">
@@ -251,6 +262,7 @@ const HeroSection = () => {
             </p>
           </div>
         </div>
+        
 
         {/* Mission Statement */}
         <div className="mission-statement">
@@ -263,16 +275,16 @@ const HeroSection = () => {
             </p>
             <div className="mission-stats">
               <div className="stat-item">
-                <div className="stat-number">1M+</div>
+                <div className="stat-number">10,000+</div>
                 <div className="stat-label">Lives Impacted</div>
               </div>
               <div className="stat-item">
-                <div className="stat-number">50+</div>
+                <div className="stat-number">5+</div>
                 <div className="stat-label">Countries Reached</div>
               </div>
               <div className="stat-item">
-                <div className="stat-number">100%</div>
-                <div className="stat-label">Open Source</div>
+                <div className="stat-number">3 Years+</div>
+                <div className="stat-label">Of Excellence</div>
               </div>
             </div>
           </div>
@@ -297,6 +309,8 @@ const HeroSection = () => {
       <div className="bg-decoration-center"></div>
     </div>
     </section>
+    </element>
+    <element name="contact">
     <section>
         <div className="contact-container">
       <div className="contact-content">
@@ -421,7 +435,7 @@ const HeroSection = () => {
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Email Us</h4>
-                    <p className="method-text">hello@curiositylab.com</p>
+                    <p className="method-text">contact@curiositylab.in</p>
                     <p className="method-subtext">We reply within 24 hours</p>
                   </div>
                 </div>
@@ -432,7 +446,7 @@ const HeroSection = () => {
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Call Us</h4>
-                    <p className="method-text">+1 (555) 123-4567</p>
+                    <p className="method-text">+91 8815057965<br/>+91 9201703911</p>
                     <p className="method-subtext">Mon-Fri, 9 AM - 6 PM EST</p>
                   </div>
                 </div>
@@ -443,7 +457,7 @@ const HeroSection = () => {
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Visit Us</h4>
-                    <p className="method-text">123 Innovation Street<br />Tech District, CA 94043</p>
+                    <p className="method-text">Building No.23 , Nehru Nagar<br />Smriti Nagar, Bhilai 491001</p>
                     <p className="method-subtext">Open for scheduled meetings</p>
                   </div>
                 </div>
@@ -481,9 +495,11 @@ const HeroSection = () => {
       <div className="bg-decoration-center"></div>
     </div>
     </section>
+    </element>
+    <Footer/>
     </>
     
   );
 };
 
-export default HeroSection;
+export default Home;
