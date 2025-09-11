@@ -1,8 +1,21 @@
 import React,{useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import Footer from "../components/Footer"
+import Footer from "../components/Footer";
 import '../styles/NewHome.css';
+import insta from "../assets/icons/instagram.png";
+import youtube from "../assets/icons/youtube.png";
+import x from "../assets/icons/x.png";
+import linkedin from "../assets/icons/linkedin.png";
 import {Link , ELement} from "react-scroll" ;
+import commitment from "../assets/icons/commitment.png";
+import collab from "../assets/icons/collab.png";
+import innovation from "../assets/icons/innovation.png";
+import future from "../assets/icons/future.png";
+import globe from "../assets/icons/globe.png";
+import community from "../assets/icons/community.png";
+import email from "../assets/icons/email.png";
+import phone from "../assets/icons/phone.png"
+import location from "../assets/icons/location.png";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -140,7 +153,7 @@ const Home = () => {
         <div className="values-grid">
           <div className="value-card innovation-card">
             <div className="value-icon">
-              <div className="icon-placeholder innovation-icon">💡</div>
+              <div className="icon-placeholder innovation-icon"><img src={innovation}/></div>
             </div>
             <h3 className="value-title">Innovation at Heart</h3>
             <p className="value-description">
@@ -153,7 +166,7 @@ const Home = () => {
 
           <div className="value-card collaboration-card">
             <div className="value-icon">
-              <div className="icon-placeholder collaboration-icon">👥</div>
+              <div className="icon-placeholder collaboration-icon"><img src={collab}/></div>
             </div>
             <h3 className="value-title">Collaborative Spirit</h3>
             <p className="value-description">
@@ -166,7 +179,7 @@ const Home = () => {
 
           <div className="value-card quality-card">
             <div className="value-icon">
-              <div className="icon-placeholder quality-icon">✓</div>
+              <div className="icon-placeholder quality-icon"><img src={commitment}/></div>
             </div>
             <h3 className="value-title">Commitment to Excellence</h3>
             <p className="value-description">
@@ -213,7 +226,7 @@ const Home = () => {
           <div className="goal-card primary-goal">
             <div className="goal-number">01</div>
             <div className="goal-icon">
-              <div className="icon-placeholder impact-icon">🌍</div>
+              <div className="icon-placeholder impact-icon"><img src={globe}/></div>
             </div>
             <h3 className="goal-title-card">Global Impact</h3>
             <p className="goal-description-card">
@@ -226,7 +239,7 @@ const Home = () => {
           <div className="goal-card secondary-goal">
             <div className="goal-number">02</div>
             <div className="goal-icon">
-              <div className="icon-placeholder innovation-icon">🚀</div>
+              <div className="icon-placeholder innovation-icon"><img src={innovation}/></div>
             </div>
             <h3 className="goal-title-card">Innovation Leadership</h3>
             <p className="goal-description-card">
@@ -239,7 +252,7 @@ const Home = () => {
           <div className="goal-card tertiary-goal">
             <div className="goal-number">03</div>
             <div className="goal-icon">
-              <div className="icon-placeholder community-icon">🤝</div>
+              <div className="icon-placeholder community-icon"><img src={community}/></div>
             </div>
             <h3 className="goal-title-card">Community Empowerment</h3>
             <p className="goal-description-card">
@@ -252,7 +265,7 @@ const Home = () => {
           <div className="goal-card quaternary-goal">
             <div className="goal-number">04</div>
             <div className="goal-icon">
-              <div className="icon-placeholder future-icon">⭐</div>
+              <div className="icon-placeholder future-icon"><img src={future}/></div>
             </div>
             <h3 className="goal-title-card">Future-Ready Solutions</h3>
             <p className="goal-description-card">
@@ -431,7 +444,7 @@ const Home = () => {
               <div className="contact-methods">
                 <div className="contact-method">
                   <div className="method-icon">
-                    <div className="icon-placeholder email-icon">📧</div>
+                    <div className="icon-placeholder email-icon"><img src={email}/></div>
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Email Us</h4>
@@ -442,7 +455,7 @@ const Home = () => {
 
                 <div className="contact-method">
                   <div className="method-icon">
-                    <div className="icon-placeholder phone-icon">📞</div>
+                    <div className="icon-placeholder phone-icon"><img src={phone}/></div>
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Call Us</h4>
@@ -453,7 +466,7 @@ const Home = () => {
 
                 <div className="contact-method">
                   <div className="method-icon">
-                    <div className="icon-placeholder location-icon">📍</div>
+                    <div className="icon-placeholder location-icon"><img src={location}/></div>
                   </div>
                   <div className="method-info">
                     <h4 className="method-title">Visit Us</h4>
@@ -466,10 +479,10 @@ const Home = () => {
               <div className="social-links">
                 <h4 className="social-title">Follow our journey</h4>
                 <div className="social-icons">
-                  <div className="social-icon">💼</div>
-                  <div className="social-icon">🐱</div>
-                  <div className="social-icon">🐦</div>
-                  <div className="social-icon">📺</div>
+                  <div className="social-icon"><img src={insta} /></div>
+                  <div className="social-icon"><img src={youtube} /></div>
+                  <div className="social-icon"><img src={x} /></div>
+                  <div className="social-icon"><img src={linkedin} /></div>
                 </div>
               </div>
             </div>

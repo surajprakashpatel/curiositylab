@@ -464,20 +464,11 @@
   transition: transform 0.3s ease;
 }
 
-.innovation-icon {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-}
 
-.collaboration-icon {
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  color: white;
-}
 
-.quality-icon {
-  background: linear-gradient(135deg, #06b6d4, #3b82f6);
-  color: white;
-}
+
+
+
 
 
 
@@ -501,7 +492,7 @@
 }
 
 .meet-team-btn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: #000;
   color: white;
   border: none;
   padding: 1rem 2.5rem;
@@ -519,7 +510,7 @@
 .meet-team-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-  background: linear-gradient(135deg, #5b5fc7, #7c3aed);
+  background: #000;
 }
 
 .btn-arrow {
@@ -795,25 +786,6 @@
   overflow: hidden;
 }
 
-.impact-icon {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-}
-
-.innovation-icon {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: white;
-}
-
-.community-icon {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-}
-
-.future-icon {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  color: white;
-}
 
 .goal-card:hover .icon-placeholder {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -932,7 +904,7 @@
 }
 
 .join-mission-btn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: #000;
   color: white;
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
 }
@@ -946,14 +918,14 @@
 .join-mission-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-  background: linear-gradient(135deg, #5b5fc7, #7c3aed);
+  
 }
 
 .learn-more-btn:hover {
   transform: translateY(-2px);
   background: #f8fafc;
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: #000;
+  color: #000;
 }
 
 .btn-arrow {
@@ -1265,7 +1237,7 @@
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: #000 !important; 
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -1285,7 +1257,6 @@
 .submit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-  background: linear-gradient(135deg, #5b5fc7, #7c3aed);
 }
 
 .btn-arrow {
@@ -1305,10 +1276,10 @@
 }
 
 .contact-info-card {
-  background: linear-gradient(135deg, #1e293b, #334155);
+  background: #fff;
   padding: 3rem 2.5rem;
   border-radius: 20px;
-  color: white;
+  color: #000;
   position: relative;
   overflow: hidden;
 }
@@ -1328,7 +1299,7 @@
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  background: #000;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1337,7 +1308,7 @@
 }
 
 .info-subtitle {
-  color: #cbd5e1;
+  color: #000;
   line-height: 1.5;
   margin-bottom: 2rem;
   position: relative;
@@ -1374,18 +1345,6 @@
   transition: transform 0.3s ease;
 }
 
-.email-icon {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-}
-
-.phone-icon {
-  background: linear-gradient(135deg, #10b981, #047857);
-}
-
-.location-icon {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
 .contact-method:hover .icon-placeholder {
   transform: scale(1.1);
 }
@@ -1397,18 +1356,18 @@
 .method-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: white;
+  color: #000;
   margin-bottom: 0.25rem;
 }
 
 .method-text {
-  color: #e2e8f0;
+  color: #000;
   font-size: 1rem;
   margin-bottom: 0.25rem;
 }
 
 .method-subtext {
-  color: #94a3b8;
+  color: #5a45e6ff;
   font-size: 0.9rem;
 }
 
@@ -1422,7 +1381,7 @@
 .social-title {
   font-size: 1rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: #000;
   margin-bottom: 1rem;
 }
 
