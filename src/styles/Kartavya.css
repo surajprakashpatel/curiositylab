@@ -357,3 +357,323 @@
     height: 300px;
   }
 }
+/* Kartavya Hero Section - Unique CSS Classes to Avoid Conflicts */
+
+.kartavya-hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  background: linear-gradient(135deg, #e0f8f0 0%, #d1e9fc 100%);
+  overflow: hidden;
+}
+
+.kartavya-hero-container {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.kartavya-hero-content {
+  color: white;
+  animation: kartavyaSlideInLeft 0.8s ease-out;
+}
+
+.kartavya-hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: #0B2D48;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  color:#0B2D48;
+  font-weight: 300;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-hero-description {
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+  color: #0B2D48;
+  line-height: 1.7;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.kartavya-btn {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-btn-primary {
+  background: #ca5959ff;
+  color: white;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+}
+
+.kartavya-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(79, 70, 229, 0.4);
+}
+
+.kartavya-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #0B2D48;
+  border: 2px solid #0B2D48;
+  backdrop-filter: blur(10px);
+}
+
+.kartavya-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.kartavya-hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: kartavyaSlideInRight 0.8s ease-out;
+}
+
+.kartavya-app-mockup {
+  width: 300px;
+  height: 600px;
+  background: linear-gradient(45deg, #1e293b, #334155);
+  border-radius: 30px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: kartavyaFloat 6s ease-in-out infinite;
+}
+
+.kartavya-mockup-screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border-radius: 20px;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kartavya-mockup-header {
+  text-align: center;
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-dashboard-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #4f46e5;
+}
+
+.kartavya-card-title {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.kartavya-status-indicator {
+  width: 12px;
+  height: 12px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: kartavyaPulse 2s infinite;
+}
+
+.kartavya-floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kartavya-floating-icon {
+  position: absolute;
+  opacity: 0.1;
+  animation: kartavyaFloatAround 15s infinite linear;
+  font-size: 2rem;
+}
+
+.kartavya-floating-icon:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.kartavya-floating-icon:nth-child(2) {
+  top: 60%;
+  right: 15%;
+  animation-delay: 5s;
+}
+
+.kartavya-floating-icon:nth-child(3) {
+  bottom: 30%;
+  left: 5%;
+  animation-delay: 10s;
+}
+
+/* Kartavya Unique Animations */
+@keyframes kartavyaSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes kartavyaSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes kartavyaFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes kartavyaPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes kartavyaFloatAround {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(20px) rotate(270deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(360deg);
+  }
+}
+
+/* Kartavya Responsive Design */
+@media (max-width: 768px) {
+  .kartavya-hero-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .kartavya-hero-title {
+    font-size: 2.5rem;
+  }
+
+  .kartavya-hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .kartavya-app-mockup {
+    width: 250px;
+    height: 500px;
+  }
+
+  .kartavya-cta-buttons {
+    justify-content: center;
+  }
+
+  .kartavya-hero-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .kartavya-hero-title {
+    font-size: 2rem;
+  }
+  
+  .kartavya-hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .kartavya-hero-description {
+    font-size: 0.95rem;
+  }
+  
+  .kartavya-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .kartavya-app-mockup {
+    width: 220px;
+    height: 440px;
+  }
+  
+  .kartavya-hero-container {
+    gap: 1.5rem;
+  }
+}

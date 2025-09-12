@@ -3,7 +3,64 @@ import '../styles/Kartavya.css';
 import girl from '../assets/images/girl.svg'
 
 const Kartavya = () => {
-  return (
+  return (<>
+  <section>
+      <div>
+      <div className="kartavya-floating-elements">
+        <div className="kartavya-floating-icon">📱</div>
+        <div className="kartavya-floating-icon">⏰</div>
+        <div className="kartavya-floating-icon">📊</div>
+      </div>
+
+      <section className="kartavya-hero-section">
+        <div className="kartavya-hero-container">
+          <div className="kartavya-hero-content">
+            <h1 className="kartavya-hero-title">Kartavya</h1>
+            <p className="kartavya-hero-subtitle">Smart Attendance Tracking Made Simple</p>
+            <p className="kartavya-hero-description">
+              Transform your attendance management with Kartavya's intuitive interface. 
+              Track attendance, generate reports, and manage teams effortlessly with our 
+              powerful yet simple mobile application.
+            </p>
+            <div className="kartavya-cta-buttons">
+              <a href="#" className="kartavya-btn kartavya-btn-primary">
+                📱 Download App
+              </a>
+              <a href="#" className="kartavya-btn kartavya-btn-secondary">
+                🎥 Watch Demo
+              </a>
+            </div>
+          </div>
+          
+          <div className="kartavya-hero-visual">
+            <div className="kartavya-app-mockup">
+              <div className="kartavya-mockup-screen">
+                <div className="kartavya-mockup-header">Kartavya Dashboard</div>
+                
+                <div className="kartavya-dashboard-card">
+                  <div className="kartavya-card-title">Today's Attendance</div>
+                  <div className="kartavya-card-value">
+                    <span className="kartavya-status-indicator"></span>
+                    Present
+                  </div>
+                </div>
+                
+                <div className="kartavya-dashboard-card">
+                  <div className="kartavya-card-title">This Week</div>
+                  <div className="kartavya-card-value">5/5 Days</div>
+                </div>
+                
+                <div className="kartavya-dashboard-card">
+                  <div className="kartavya-card-title">Monthly Stats</div>
+                  <div className="kartavya-card-value">95% Rate</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
     <section className="attendance-hero">
       <div className="attendance-hero-container">
         <div className="attendance-hero-content">
@@ -76,6 +133,7 @@ const Kartavya = () => {
         </div>
       </div>
     </section>
+    </>
   );
 };
 
