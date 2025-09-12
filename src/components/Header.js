@@ -7,7 +7,7 @@ const Header = () => {
       return(<div classname="hero-container">
       <nav className="navbar">
         <div className="nav-content">
-          <div className="logo">
+          <div className="header-logo">
             Curiosity Lab
           </div>
           <div className="nav-links">
@@ -22,6 +22,12 @@ const Header = () => {
             <div className="nav-item dropdown">
               Resources
               <span className="dropdown-arrow">▼</span>
+            </div>
+            <div className="nav-item dropdown" onClick={()=>navigate("/careers")}>
+              Careers
+            </div>
+            <div className="nav-item dropdown" onClick={()=>navigate("/kartavya")}>
+              Kartavya
             </div>
             <Link to="about" smooth={true} duration={500}>
             <div className="nav-item">About Us</div>
