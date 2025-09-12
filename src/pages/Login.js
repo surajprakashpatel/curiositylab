@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/login.css';
 import googleIcon from '../assets/google-icon.svg';
 import { useAuth } from '../contexts/AuthContext';
+import Header from '../components/Header';
 
 const LoginPage = () => {
+  useEffect(() => {
+  document.body.classList.add('login-page');
+  return () => {
+    document.body.classList.remove('login-page');
+  };
+}, []);
   const navigate = useNavigate();
   const { login, loginWithGoogle, resetPassword, fetchUserProfile, logout } = useAuth();
   
@@ -145,7 +152,8 @@ const LoginPage = () => {
     }
   };
 
-  return (
+  return (<>
+    <Header/>
     <div className="login-container">
       <div className="right-panel">
         <div className="login-form-container">
@@ -244,13 +252,19 @@ const LoginPage = () => {
       </div>
       
       <div className="left-panel">
-        <div className="left-panel-content">
-          <h1>Welcome to Curiosity Lab</h1>
-          <p>Your all-in-one ERP solution for project management</p>
-        </div>
-      </div>
+  {/* Floating geometric decorations */}
+  <div className="geometric-decoration shape-circle-1"></div>
+  <div className="geometric-decoration shape-square-1"></div>
+  <div className="geometric-decoration shape-circle-2"></div>
+  <div className="geometric-decoration shape-square-2"></div>
+  
+  <div className="left-panel-content">
+    <h1>Welcome to Curiosity Lab</h1>
+    <p>Your all-in-one ERP solution for project management</p>
+  </div>
+</div>
     </div>
-  );
+  </>);
 };
 
 export default LoginPage;
