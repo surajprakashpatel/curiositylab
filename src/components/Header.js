@@ -7,7 +7,7 @@ const Header = () => {
       return(<div classname="hero-container">
       <nav className="navbar">
         <div className="nav-content">
-          <div className="header-logo">
+          <div className="header-logo" onClick={()=>navigate("/")}>
             Curiosity Lab
           </div>
           <div className="nav-links">

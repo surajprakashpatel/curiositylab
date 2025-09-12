@@ -3,6 +3,12 @@ import '../styles/Kartavya.css';
 import girl from '../assets/images/girl.svg';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import fingerprint from '../assets/icons/fingerprint.png';
+import rupee from '../assets/icons/rupee.svg';
+import handshake from '../assets/icons/handshake.svg';
+import facescan from '../assets/icons/facescan.png';
+import correct from '../assets/icons/correct.svg';
+
 
 const Kartavya = () => {
     const [expandedSections, setExpandedSections] = useState({});
@@ -77,7 +83,7 @@ const Kartavya = () => {
             </p>
             <div className="kartavya-cta-buttons">
               <a href="#" className="kartavya-btn kartavya-btn-primary">
-                📱 Download App
+                ↓ Download App
               </a>
               <a href="#" className="kartavya-btn kartavya-btn-secondary">
                 🎥 Watch Demo
@@ -173,11 +179,11 @@ const Kartavya = () => {
           
           <div className="attendance-hero-image">
             <div className="floating-icons">
-              <div className="floating-icon icon-1">👥</div>
-              <div className="floating-icon icon-2">🔍</div>
-              <div className="floating-icon icon-3">🤝</div>
-              <div className="floating-icon icon-4">💼</div>
-              <div className="floating-icon icon-5">👆</div>
+              <div className="floating-icon icon-1"><img src={rupee}/></div>
+              <div className="floating-icon icon-2"><img src={fingerprint}/></div>
+              <div className="floating-icon icon-3"><img src={handshake}/></div>
+              <div className="floating-icon icon-4"><img src={correct}/></div>
+              <div className="floating-icon icon-5"><img src={facescan}/></div>
             </div>
             <div className="main-illustration">
                 <img src={girl} alt="Girl with smartphone" />
