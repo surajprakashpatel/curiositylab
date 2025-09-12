@@ -9,6 +9,8 @@ import Projects from './pages/Tasks';
 import Admin from './pages/Admin';
 import Client from './pages/Client';
 import PrivacyPolicy from './pages/KartavyaPrivacy';
+import Kartavya from './pages/Kartavya';
+import Career from './pages/Career';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="/dashboard" element={<Projects />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/client" element={<Client />} />
+            <Route path="/kartavya" element={<Kartavya/>}/>
+            <Route path='/careers' element={<Career/>}/>
           </Routes>
         </Router>
       </GithubProvider>
