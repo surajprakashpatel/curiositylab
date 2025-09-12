@@ -4,7 +4,7 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   position: relative;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
 }
 
 .header-logo{
@@ -16,4 +16,8 @@
   color:#1e293b;
   height:60px;
 
+}
+
+.header-logo:hover{
+  cursor:pointer;
 }
