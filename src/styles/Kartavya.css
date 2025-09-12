@@ -105,7 +105,7 @@
 }
 
 .feature-icon {
-  background: #22c55e;
+  background: #000;
   color: white;
   width: 24px;
   height: 24px;
@@ -675,5 +675,254 @@
   
   .kartavya-hero-container {
     gap: 1.5rem;
+  }
+}
+/* USPsSection.css */
+
+.usps-wrapper {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  background-color: #EDF5FD;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* Header Section */
+.header-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-badge {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1;
+  border-radius: 9999px;
+  background-color: #E3F1FF;
+  border: 1px solid #C6E2F8;
+  color: #0D6AC0;
+  margin-bottom: 1.75rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #173552;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #475569;
+  padding-bottom: 4rem;
+}
+
+.hidden-mobile {
+  display: none;
+}
+
+/* USPs Content */
+.usps-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.usp-item {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding-top: 4.5rem;
+}
+
+.usp-item.last {
+  margin-bottom: 5rem;
+}
+
+.usp-text {
+  order: 2;
+}
+
+.usp-image {
+  order: 1;
+  display: flex;
+  justify-content: center;
+  margin: auto;
+}
+
+.usp-image img {
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  margin-bottom: 2rem;
+}
+
+.usp-title {
+  font-size: 1.875rem;
+  font-weight: 500;
+  color: #173552;
+  margin-bottom: 1rem;
+}
+
+.usp-description {
+  font-size: 1.125rem;
+  line-height: 1.25;
+  font-weight: 400;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.feature-list.expanded {
+  max-height: 1000px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  font-size: 1.125rem;
+  color: #173552;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+.bullet-point {
+  margin-right: 0.75rem;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.read-more-btn {
+  font-size: 1rem;
+  color: #0089DE;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.read-more-btn:hover {
+  text-decoration: underline;
+}
+
+/* Tablet Styles */
+@media (min-width: 640px) {
+  .container {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  .section-badge {
+    padding: 0.625rem 1.5rem;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+  .header-section {
+    margin-bottom: 3rem;
+  }
+
+  .hidden-mobile {
+    display: block;
+  }
+
+  .usps-content {
+    gap: 6rem;
+  }
+
+  .usp-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4rem;
+  }
+
+  .usp-item.last {
+    margin-bottom: 5rem;
+  }
+
+  .usp-text {
+    flex-basis: 50%;
+    padding-right: 5rem;
+    order: 1;
+  }
+
+  .usp-item.reverse .usp-text {
+    padding-right: 0;
+    padding-left: 6rem;
+    order: 2;
+  }
+
+  .usp-image {
+    flex-basis: 50%;
+    order: 2;
+    justify-content: flex-end;
+  }
+
+  .usp-item.reverse .usp-image {
+    order: 1;
+    justify-content: flex-start;
+  }
+
+  .usp-image img {
+    margin-bottom: 0;
+  }
+
+  .usp-description {
+    line-height: 1.5;
+  }
+
+  .feature-list {
+    display: block !important;
+    max-height: none !important;
+    margin-top: 1.5rem;
+  }
+
+  .read-more-btn {
+    display: none;
+  }
+}
+
+/* Large Desktop Styles */
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 7rem;
+    padding-right: 7rem;
+  }
+}
+
+/* Extra Large Desktop Styles */
+@media (min-width: 1280px) {
+  .container {
+    padding-left: 11rem;
+    padding-right: 11rem;
+  }
+
+  .usp-description {
+    line-height: 1.5;
   }
 }
